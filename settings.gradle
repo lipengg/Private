@@ -1,0 +1,4 @@
+include ':viewmodel'
+include ':model'
+include ':app'
+rootProject.name = "Album"
