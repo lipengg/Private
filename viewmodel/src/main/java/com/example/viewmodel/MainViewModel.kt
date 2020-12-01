@@ -151,6 +151,8 @@ class MainViewModel: BaseViewModel() {
 
     fun selectAlbum(album: ImageFolder) {
         if (album.id == currentAlbum.value!!.id) return
+        currentAlbum.value!!.selected = false
+        album.selected = true
         if (totalAlbumId == album.id) {
             currentAlbum.value = album
             images.clear()

@@ -22,8 +22,11 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
     override fun getResourceLayout() = R.layout.fragment_gallery
 
     override fun initView(root: View) {
-        iv_current_gallery.setOnClickListener{
+        tv_current_gallery.setOnClickListener{
             showAlbumDialog()
+        }
+        iv_cancel.setOnClickListener{
+            cancel()
         }
         btn_select_total.setOnClickListener{
             mViewModel.encrypt()
@@ -66,6 +69,14 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
     override fun setViewModel(binding: FragmentGalleryBinding, vm: MainViewModel) {
         binding.viewModel = vm
         binding.lifecycleOwner = this
+    }
+
+    private fun cancel() {
+        if (albumDialog!!.isShowing) {
+            albumDialog!!.dismiss()
+            return
+        }
+        findNavController().popBackStack()
     }
 
     private var albumDialog: AlbumDialog? = null
