@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">Album</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="wait_album_loading">相册加载中, 请耐心等待</string>
 </resources>

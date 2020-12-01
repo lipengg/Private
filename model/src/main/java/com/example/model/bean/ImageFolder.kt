@@ -1,6 +1,7 @@
 package com.example.model.bean
 
 data class ImageFolder(
+    var id: Int,
     var dir: String,
     var firstImagePath: String,
     var dirName: String,

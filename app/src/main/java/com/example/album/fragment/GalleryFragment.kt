@@ -1,26 +1,21 @@
 package com.example.album.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.album.R
 import com.example.album.adapter.ImageAdapter
 import com.example.album.base.BaseBindingFragment
-import com.example.album.databinding.FragmentAlbumBinding
 import com.example.album.databinding.FragmentGalleryBinding
 import com.example.album.dialog.AlbumDialog
-import com.example.viewmodel.AlbumViewModel
+import com.example.model.bean.Image
 import com.example.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 
 class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewModel>() {
-
-
 
     override fun getViewModel() = MainViewModel.getInstance()
 
@@ -30,6 +25,9 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         iv_current_gallery.setOnClickListener{
             showAlbumDialog()
         }
+        btn_select_total.setOnClickListener{
+            mViewModel.encrypt()
+        }
         initRecycleView()
     }
 
@@ -38,13 +36,31 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_image_list.layoutManager = layoutManager
-        imageAdapter = ImageAdapter(mBinding!!.viewModel!!.images)
+        imageAdapter = ImageAdapter(mBinding!!.viewModel!!.images, object: ImageAdapter.OnClickListener{
+            override fun show(image: Image) {
+                showImage(image)
+            }
+
+        }, object : ImageAdapter.OnCheckedChangeListener {
+            override fun onCheckedChanged(image: Image, isChecked: Boolean) {
+                mViewModel.checkImage(image, isChecked)
+            }
+        })
         rv_image_list.adapter = imageAdapter
+    }
+
+    fun showImage(image: Image) {
+        var bundle = Bundle()
+        bundle.putString("path", image.path)
+        var navController = findNavController()
+        navController.navigate(R.id.action_galleryFragment_to_imageFragment4, bundle)
     }
 
 
     override fun initData(savedInstanceState: Bundle?) {
-        mViewModel!!.getImageList()
+        mViewModel.encryptResult.observe(this, Observer {
+            findNavController().popBackStack()
+        })
     }
 
     override fun setViewModel(binding: FragmentGalleryBinding, vm: MainViewModel) {
@@ -52,7 +68,7 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         binding.lifecycleOwner = this
     }
 
-    var albumDialog: AlbumDialog? = null
+    private var albumDialog: AlbumDialog? = null
     private fun showAlbumDialog() {
         if (albumDialog == null) {
             albumDialog = AlbumDialog(activity)

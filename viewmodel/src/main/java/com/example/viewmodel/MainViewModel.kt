@@ -4,11 +4,15 @@ import android.app.Application
 import android.content.ContentResolver
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.lifecycle.MutableLiveData
 import com.example.model.bean.Image
 import com.example.model.bean.ImageFolder
+import com.example.model.bean.PrivateImage
+import com.example.model.database.DatabaseManager
 import com.example.viewmodel.base.BaseViewModel
+import com.example.viewmodel.utils.FileUtils
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -25,7 +29,19 @@ class MainViewModel: BaseViewModel() {
     var tempImages = ArrayList<Image>()
     var allImages = ArrayList<Image>()
 
-    var current_gallery = ObservableArrayList<String>()
+    var initialled = MutableLiveData<Boolean>()
+
+    var currentAlbum = MutableLiveData<ImageFolder>()
+    var totalAlbumId = 0
+
+    var selectedImages = ArrayList<Image>()
+    var encryptImages = ObservableArrayList<PrivateImage>()
+
+    var selectNumber = MutableLiveData<Int>()
+
+    var selectInfo = MutableLiveData<String>()
+
+    var encryptResult = MutableLiveData<Boolean>()
 
 /*    constructor(mApplication: Application):super(mApplication) {
         //getImageList()
@@ -33,11 +49,12 @@ class MainViewModel: BaseViewModel() {
 
     fun initial(application: Application): MainViewModel {
         mApplication = application
+        //updateEncryptImage()
         getImageList()
         return this
     }
 
-    fun getImageList() {
+    private fun getImageList() {
         if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
             //Toast.makeText(context, "当前存储卡不可用", Toast.LENGTH_SHORT).show()
             result.value = "当前存储卡不可用"
@@ -53,17 +70,120 @@ class MainViewModel: BaseViewModel() {
 
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            currentAlbum.value = tempFolders[0]
             images.addAll(allImages)
-            /*for (image in allImages) {
-                images.add(image)
-            }*/
             imageFolders.addAll(tempFolders)
+            initialled.value = true
         }, {
             result.value = ""
+            Log.e("MainViewModel","getImageList failed! Error: " + it.message)
         }))
     }
 
-    private fun selectGallery(gallery: String?) {
+    private fun updateEncryptImage() {
+        Flowable.just(1).flatMap {
+            var list = DatabaseManager.dbManager.getPrivateImageDao().getAll()
+            return@flatMap Flowable.just(list)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            encryptImages.clear()
+            for (privateImage in it) {
+                encryptImages.add(privateImage)
+            }
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+
+    fun encrypt() {
+        if (selectedImages.isEmpty()) {
+            encryptResult.value = true
+            return
+        }
+        Flowable.just(selectedImages).flatMap {
+            var encryptList = ArrayList<PrivateImage>()
+            for (image in it) {
+                var privateFilename = FileUtils.getImagePrivateFileName()
+                var privateImagePath = FileUtils.getPrivateDirectory() + privateFilename
+                var privateImage = PrivateImage(0, privateFilename, image.filename, image.path, false)
+                if(FileUtils.moveImage(image.path , privateImagePath, mApplication!!)) {
+                    encryptList.add(privateImage)
+                } else {
+                    Log.i("MainViewModel", "move image failure!")
+                }
+            }
+            DatabaseManager.dbManager.getPrivateImageDao().insert(encryptList)
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            updateEncryptImage()
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+
+
+    }
+
+    fun checkImage(image: Image, isChecked: Boolean) {
+        try {
+            if (isChecked) {
+                selectedImages.add(image)
+            } else {
+                for (img in selectedImages) {
+                    if (img.path == image.path) {
+                        selectedImages.remove(img)
+                        break
+                    }
+                }
+            }
+
+            selectNumber.value = selectedImages.size
+
+            if (selectedImages.size == 0) {
+                selectInfo.value = "退出"
+            } else {
+                selectInfo.value = "确定(" + selectedImages.size + ")"
+            }
+        } catch (e:Exception) {
+            Log.e("MainViewModel", "checkImage Error:" + e.message)
+        }
+
+    }
+
+    fun selectAlbum(album: ImageFolder) {
+        if (album.id == currentAlbum.value!!.id) return
+        if (totalAlbumId == album.id) {
+            currentAlbum.value = album
+            images.clear()
+            images.addAll(allImages)
+            return
+        }
+        mDisPosable.add(Flowable.just(album).flatMap {
+            tempImages.clear()
+            //val parentFile = File(it.firstImagePath).parentFile
+            val parentFile = File(it.dir)
+            if (parentFile != null) {
+                parentFile.list{dir: File, name: String ->
+                    if (name.endsWith(".jpg") ||
+                        name.endsWith(".jpeg") ||
+                        name.endsWith(".png")) {
+                        tempImages.add(Image(name, dir.path + "/" + name, false))
+                        return@list true
+                    }
+                    return@list false
+                }
+            } else {
+                throw NullAlbumDirectoryException("Album " + it.dirName + " Directory is null")
+            }
+
+            return@flatMap Flowable.just(true)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            currentAlbum.value = album
+            images.clear()
+            images.addAll(tempImages)
+        }, {
+            result.value = ""
+            Log.e("MainViewModel","selectAlbum failed! Error: " + it.message)
+        }))
 
     }
 
@@ -84,11 +204,11 @@ class MainViewModel: BaseViewModel() {
             cursor.moveToPosition(i)
             val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
             if (i == count - 1) {
-                val imageFolder = ImageFolder("",path,"所有图片",0,true,0)
+                val imageFolder = ImageFolder(i, "",path,"所有图片",0,true,0)
+                totalAlbumId = i
                 tempFolders.add(imageFolder)
             }
-            val imgBean = Image(path, false)
-            //images.add(imgBean)
+            val imgBean = Image(File(path).name, path, false)
             allImages.add(imgBean)
             val parentFile = File(path).parentFile ?: continue
             val dirPath = parentFile.absolutePath
@@ -97,7 +217,7 @@ class MainViewModel: BaseViewModel() {
                 continue
             } else {
                 dirPaths.add(dirPath)
-                imageFolder = ImageFolder(dirPath, path, parentFile.name, 0, false, 1)
+                imageFolder = ImageFolder(i, dirPath, path, parentFile.name, 0, false, 1)
                 tempFolders.add(imageFolder)
             }
             if (parentFile.list() == null) continue
@@ -111,6 +231,8 @@ class MainViewModel: BaseViewModel() {
         message.what = 0x001
         handler.sendMessage(message)*/
     }
+
+    inner class NullAlbumDirectoryException(message: String): Exception(message)
 
     companion object {
         private var instance = MainViewModel()

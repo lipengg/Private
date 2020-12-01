@@ -33,9 +33,6 @@ abstract class BaseBindingFragment<DB : ViewDataBinding, VM : BaseViewModel> : B
 
     override fun onDestroyView() {
         mBinding.unbind()
-        if(!sharedModelView()) {
-            mViewModel.onDestory()
-        }
         super.onDestroyView()
     }
 }

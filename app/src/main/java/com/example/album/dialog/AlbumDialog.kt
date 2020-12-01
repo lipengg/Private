@@ -15,6 +15,7 @@ import com.example.album.R
 import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
 import com.example.album.fragment.GalleryFragment
+import com.example.model.bean.ImageFolder
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.dialog_album.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
@@ -36,7 +37,7 @@ class AlbumDialog : Dialog {
         mLayoutParams.gravity = Gravity.CENTER
         val view: View = View.inflate(context, R.layout.dialog_album, null)
         setContentView(view)
-        setCancelable(false)
+        setCancelable(true)
         setCanceledOnTouchOutside(false)
  /*       var lp = mWindow.attributes
         val outSize = Rect()
@@ -49,11 +50,16 @@ class AlbumDialog : Dialog {
 
     private var albumAdapter: AlbumAdapter? = null
     private fun initRecycleView() {
-        var viewModel = MainViewModel.getInstance()
         val layoutManager = LinearLayoutManager(context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_gallery_list.layoutManager = layoutManager
-        albumAdapter = AlbumAdapter(viewModel!!.imageFolders)
+        albumAdapter = AlbumAdapter(MainViewModel.getInstance().imageFolders, object: AlbumAdapter.OnSelectListener{
+            override fun select(album: ImageFolder) {
+                MainViewModel.getInstance().selectAlbum(album)
+                dismiss()
+            }
+
+        })
         rv_gallery_list.adapter = albumAdapter
     }
 

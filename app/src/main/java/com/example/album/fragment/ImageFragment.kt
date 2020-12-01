@@ -8,11 +8,12 @@ import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import com.example.album.R
 import kotlinx.android.synthetic.main.fragment_image.*
+import java.io.File
 
 
 class ImageFragment : Fragment() {
 
-    var path = arguments?.get("path")
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,8 +25,9 @@ class ImageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        var path = arguments?.getString("path")
         path?.let {
-            Glide.with(requireActivity().applicationContext).load(it).into(iv_image)
+            Glide.with(requireActivity().applicationContext).load(File(it)).into(iv_image)
         }
 
     }

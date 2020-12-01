@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import java.lang.ref.WeakReference
@@ -39,17 +40,17 @@ abstract class BaseFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater.inflate(getResourceLayout(), container, false)
-        view.setOnTouchListener { _, _ ->
+/*        view.setOnTouchListener { _, _ ->
             //hideKeyBord()
             true
-        }//防止事件穿透
+        }//防止事件穿透*/
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         this.root = view
-        initKeyBordListener()
+        //initKeyBordListener()
         initView(view)
         initData(savedInstanceState)
         //(activity as BaseActivity).fragmentChanged(getResourceLayout())
@@ -119,15 +120,20 @@ abstract class BaseFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        if (root != null && loginGlobalLayoutListener != null && root!!.viewTreeObserver != null) {
+/*        if (root != null && loginGlobalLayoutListener != null && root!!.viewTreeObserver != null) {
             root!!.viewTreeObserver.removeGlobalOnLayoutListener(loginGlobalLayoutListener)
         }
         if (root != null) {
             root!!.clearAnimation()
         }
-        loginGlobalLayoutListener = null
+        loginGlobalLayoutListener = null*/
         root = null
         super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        Log.e("BaseFragment","onDestroy")
+        super.onDestroy()
     }
 
 

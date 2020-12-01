@@ -6,7 +6,8 @@
             type="com.example.model.bean.ImageFolder" />
     </data>
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/ll_album"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 

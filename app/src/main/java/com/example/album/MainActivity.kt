@@ -15,6 +15,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MainViewModel.getInstance().initial(application)
+        //MainViewModel.getInstance().initial(application)
     }
 }

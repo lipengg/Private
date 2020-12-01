@@ -1,28 +1,31 @@
 package com.example.album.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.album.R
+import com.example.album.adapter.ImageAdapter
+import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
-import com.example.album.databinding.FragmentGalleryBinding
 import com.example.album.databinding.FragmentMainBinding
-import com.example.viewmodel.AlbumViewModel
+import com.example.model.bean.PrivateImage
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
 
 
 class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
 
-    override fun getViewModel() = MainViewModel.getInstance().initial(mApplication)
+    override fun getViewModel() = MainViewModel.getInstance()
 
     override fun getResourceLayout() = R.layout.fragment_main
 
     override fun initView(root: View) {
-        iv_add_image.setOnClickListener { findNavController().navigate(R.id.action_mainFragment_to_galleryFragment) }
+        iv_add_image.setOnClickListener {
+            findNavController().navigate(R.id.galleryFragment)
+        }
+        initRecycleView()
     }
 
     override fun setViewModel(binding: FragmentMainBinding, vm: MainViewModel) {
@@ -34,5 +37,24 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = AlbumViewModel(requireActivity().application)
     }*/
+
+    private var imageAdapter: PrivateImageAdapter? = null
+    private fun initRecycleView() {
+       /* val layoutManager = GridLayoutManager(context, GalleryFragment.SPAN_COUNT, GridLayoutManager.VERTICAL, false)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        rv_selected_image_list.layoutManager = layoutManager
+        imageAdapter = PrivateImageAdapter(mBinding!!.viewModel!!.encryptImages, object: PrivateImageAdapter.OnClickListener{
+            override fun show(image: PrivateImage) {
+                showImage(image)
+            }
+        }, null)
+        rv_selected_image_list.adapter = imageAdapter*/
+    }
+
+    fun showImage(image: PrivateImage) {
+        var bundle = Bundle()
+        bundle.putString("path", image.getFilePath())
+        findNavController().navigate(R.id.imageFragment, bundle)
+    }
 
 }

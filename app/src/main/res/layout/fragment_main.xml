@@ -10,20 +10,36 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <!--    <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_selected_photo_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>-->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/iv_add_image"
-            android:layout_width="wrap_content"
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:padding="5px"
+            android:id="@+id/rv_selected_image_list"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_add_image_24"
-            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@id/ll_select_image_operation"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout_editor_absoluteX="1dp"
+            android:visibility="invisible"
+            tools:listitem="@layout/item_private_image" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_select_image_operation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_add_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add_image_24"
+                android:layout_gravity="end"
+                android:padding="10dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <!--<androidx.appcompat.widget.AppCompatButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

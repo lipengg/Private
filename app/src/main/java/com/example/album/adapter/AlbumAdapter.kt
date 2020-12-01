@@ -12,18 +12,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
 import com.example.album.databinding.ItemAlbumBinding
-import com.example.album.databinding.ItemImageBinding
-import com.example.model.bean.Image
 import com.example.model.bean.ImageFolder
 
 class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
     private var folderList: ObservableArrayList<ImageFolder>
-    //var listener: OnDeleteBtnClickListener
+    private var listener: OnSelectListener
 
-    //constructor(imageList: ObservableArrayList<Image>, listener : OnDeleteBtnClickListener) {
-    constructor(folderList: ObservableArrayList<ImageFolder>) {
+    constructor(folderList: ObservableArrayList<ImageFolder>, listener : OnSelectListener) {
         this.folderList = folderList
-        //this.listener = listener
+        this.listener = listener
         folderList.addOnListChangedCallback(dataChangeListener)
     }
 
@@ -38,7 +35,7 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
 
     override fun onBindViewHolder(imageViewHolder: AlbumViewHolder, position: Int) {
         val folder: ImageFolder = folderList[position]
-        imageViewHolder.bind(folder)
+        imageViewHolder.bind(folder, listener)
     }
 
 
@@ -64,9 +61,9 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
 
     }
 
-/*    interface OnDeleteBtnClickListener {
-        fun delete(deviceId: String)
-    }*/
+    interface OnSelectListener {
+        fun select(album: ImageFolder)
+    }
 
     class AlbumViewHolder : RecyclerView.ViewHolder {
         private var mBinding: ItemAlbumBinding? = null
@@ -75,19 +72,16 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
             mBinding = DataBindingUtil.bind(itemView)
         }
 
-        /*  fun setOnDeleteBtnClickListener(listener : OnDeleteBtnClickListener){
-              itemView.findViewById<LinearLayout>(R.id.ll_delete_container).setOnClickListener { v ->
-                  var deviceId = itemView.findViewById<PropertyView>(R.id.pv_device_id).getPropertyValue()
-                  listener.delete(deviceId)
-              }
-          }*/
-
-        fun bind(@NonNull folder: ImageFolder) {
+        fun bind(@NonNull folder: ImageFolder, listener: OnSelectListener) {
             mBinding!!.folder = folder
             Glide.with(itemView.context.applicationContext).load(folder.firstImagePath).into(itemView.findViewById(
                 R.id.iv_cover))
             itemView.findViewById<AppCompatTextView>(R.id.tv_gallery_name).text = folder.dirName
-            itemView.findViewById<AppCompatTextView>(R.id.tv_image_size).text = folder.size.toString()
+            itemView.findViewById<AppCompatTextView>(R.id.tv_image_size).text = "(" + folder.size.toString() + ")"
+
+            itemView.setOnClickListener {
+                listener.select(folder)
+            }
         }
     }
 }
