@@ -49,6 +49,7 @@ class MainViewModel: BaseViewModel() {
 
     fun initial(application: Application): MainViewModel {
         mApplication = application
+        selectInfo.value = "退出"
         //updateEncryptImage()
         getImageList()
         return this
@@ -195,20 +196,21 @@ class MainViewModel: BaseViewModel() {
         val cursor = cr.query(
             muri,
             null,
-            MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? ",
-            arrayOf("image/jpeg", "image/png"),
+            MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? ",
+            arrayOf("image/jpg", "image/jpeg", "image/png"),
             MediaStore.Images.Media.DATE_MODIFIED
         )
-        val dirPaths: MutableSet<String> =
-            HashSet()
+        var albumId = 0
+        val dirPaths: MutableSet<String> = HashSet()
         val count = cursor!!.count
         for (i in count - 1 downTo 0) {
             cursor.moveToPosition(i)
             val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
             if (i == count - 1) {
-                val imageFolder = ImageFolder(i, "",path,"所有图片",0,true,0)
-                totalAlbumId = i
+                val imageFolder = ImageFolder(albumId, "",path,"所有图片", count,true,0)
+                totalAlbumId = imageFolder.id
                 tempFolders.add(imageFolder)
+                albumId += 1
             }
             val imgBean = Image(File(path).name, path, false)
             allImages.add(imgBean)
@@ -219,8 +221,9 @@ class MainViewModel: BaseViewModel() {
                 continue
             } else {
                 dirPaths.add(dirPath)
-                imageFolder = ImageFolder(i, dirPath, path, parentFile.name, 0, false, 1)
+                imageFolder = ImageFolder(albumId, dirPath, path, parentFile.name, 0, false, 1)
                 tempFolders.add(imageFolder)
+                albumId += 1
             }
             if (parentFile.list() == null) continue
             val picSize = parentFile.list { dir, s ->

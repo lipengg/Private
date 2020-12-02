@@ -14,6 +14,7 @@
         tools:context=".fragment.AlbumFragment"
         android:orientation="vertical">
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_gallery_top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dp">

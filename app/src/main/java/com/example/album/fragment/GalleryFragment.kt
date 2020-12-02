@@ -1,17 +1,23 @@
 package com.example.album.fragment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.PopupWindow
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.album.R
+import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentGalleryBinding
-import com.example.album.dialog.AlbumDialog
 import com.example.model.bean.Image
+import com.example.model.bean.ImageFolder
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_gallery.*
 
@@ -23,13 +29,14 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
 
     override fun initView(root: View) {
         tv_current_gallery.setOnClickListener{
-            showAlbumDialog()
+            showAlbumList()
         }
         iv_cancel.setOnClickListener{
             cancel()
         }
         btn_select_total.setOnClickListener{
-            mViewModel.encrypt()
+            //mViewModel.encrypt()
+            findNavController().popBackStack()
         }
         initRecycleView()
     }
@@ -64,6 +71,9 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         mViewModel.encryptResult.observe(this, Observer {
             findNavController().popBackStack()
         })
+        mViewModel.currentAlbum.observe(this, Observer {
+            refreshAlbumList()
+        })
     }
 
     override fun setViewModel(binding: FragmentGalleryBinding, vm: MainViewModel) {
@@ -72,21 +82,50 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
     }
 
     private fun cancel() {
-        if (albumDialog!!.isShowing) {
-            albumDialog!!.dismiss()
+        if (albumPopupWindow != null && albumPopupWindow!!.isShowing) {
+            albumPopupWindow!!.dismiss()
             return
         }
         findNavController().popBackStack()
     }
 
-    private var albumDialog: AlbumDialog? = null
-    private fun showAlbumDialog() {
-        if (albumDialog == null) {
-            albumDialog = AlbumDialog(activity)
+    private var albumPopupWindow: PopupWindow? = null
+    private var albumAdapter: AlbumAdapter? = null
+    private fun showAlbumList() {
+        if (albumPopupWindow == null) {
+            var root = LayoutInflater.from(requireContext()).inflate(R.layout.pop_album, null)
+            var albumList = root.findViewById<RecyclerView>(R.id.rv_gallery_list)
+            if (albumAdapter == null) {
+                albumAdapter = AlbumAdapter(MainViewModel.getInstance().imageFolders, object: AlbumAdapter.OnSelectListener{
+                    override fun select(album: ImageFolder) {
+                        MainViewModel.getInstance().selectAlbum(album)
+                        albumPopupWindow?.dismiss()
+                    }
+
+                })
+            }
+            val layoutManager = LinearLayoutManager(context)
+            layoutManager.orientation = LinearLayoutManager.VERTICAL
+            albumList.layoutManager = layoutManager
+            albumList.adapter = albumAdapter
+
+
+            albumPopupWindow = PopupWindow(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            albumPopupWindow?.run{
+                setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), android.R.color.transparent))
+                isFocusable = true
+                isOutsideTouchable = true
+            }
         }
-        if (!albumDialog!!.isShowing) {
-            albumDialog!!.show()
+        albumPopupWindow?.run{
+            if (!isShowing) {
+                showAsDropDown(cl_gallery_top)
+            }
         }
+    }
+
+    private fun refreshAlbumList() {
+        albumAdapter?.notifyDataSetChanged()
     }
 
     companion object {

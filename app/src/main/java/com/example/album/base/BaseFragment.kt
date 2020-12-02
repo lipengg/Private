@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
+import com.lipeng.utils.extensions.printFunctionInfo
 import java.lang.ref.WeakReference
 
 
@@ -30,6 +31,7 @@ abstract class BaseFragment : Fragment() {
     private var usableHeightPrevious = 0
 
     override fun onAttach(context: Context) {
+        printFunctionInfo()
         super.onAttach(context)
         mWeakActivity = WeakReference(activity as Activity)
         mApplication = requireContext().applicationContext as Application
@@ -132,7 +134,7 @@ abstract class BaseFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        Log.e("BaseFragment","onDestroy")
+        printFunctionInfo()
         super.onDestroy()
     }
 
