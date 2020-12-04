@@ -6,7 +6,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.album.R
-import com.example.album.adapter.ImageAdapter
 import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentMainBinding
@@ -28,6 +27,11 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         initRecycleView()
     }
 
+    override fun initData(savedInstanceState: Bundle?) {
+        super.initData(savedInstanceState)
+        mViewModel.encrypt()
+    }
+
     override fun setViewModel(binding: FragmentMainBinding, vm: MainViewModel) {
         binding.viewModel = vm
         binding.lifecycleOwner = this
@@ -40,15 +44,15 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
 
     private var imageAdapter: PrivateImageAdapter? = null
     private fun initRecycleView() {
-       /* val layoutManager = GridLayoutManager(context, GalleryFragment.SPAN_COUNT, GridLayoutManager.VERTICAL, false)
+        val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_selected_image_list.layoutManager = layoutManager
-        imageAdapter = PrivateImageAdapter(mBinding!!.viewModel!!.encryptImages, object: PrivateImageAdapter.OnClickListener{
+        imageAdapter = PrivateImageAdapter(mViewModel.encryptImages, object: PrivateImageAdapter.OnClickListener{
             override fun show(image: PrivateImage) {
                 showImage(image)
             }
         }, null)
-        rv_selected_image_list.adapter = imageAdapter*/
+        rv_selected_image_list.adapter = imageAdapter
     }
 
     fun showImage(image: PrivateImage) {
@@ -56,5 +60,7 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         bundle.putString("path", image.getFilePath())
         findNavController().navigate(R.id.imageFragment, bundle)
     }
-
+    companion object {
+        const val SPAN_COUNT = 4
+    }
 }

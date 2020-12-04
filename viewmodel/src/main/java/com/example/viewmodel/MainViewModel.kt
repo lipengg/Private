@@ -50,7 +50,7 @@ class MainViewModel: BaseViewModel() {
     fun initial(application: Application): MainViewModel {
         mApplication = application
         selectInfo.value = "退出"
-        //updateEncryptImage()
+        updateEncryptImage()
         getImageList()
         return this
     }
@@ -113,6 +113,7 @@ class MainViewModel: BaseViewModel() {
                     Log.i("MainViewModel", "move image failure!")
                 }
             }
+            it.clear()
             DatabaseManager.dbManager.getPrivateImageDao().insert(encryptList)
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({

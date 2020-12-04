@@ -48,6 +48,7 @@ class FileUtils {
                 }
                 c.close()
             }
+            file.delete()
         }
 
         fun moveImage(src: String, dest: String, application: Application): Boolean {

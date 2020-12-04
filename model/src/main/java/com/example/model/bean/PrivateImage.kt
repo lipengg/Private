@@ -14,6 +14,6 @@ class PrivateImage(@ColumnInfo(name="id") @PrimaryKey(autoGenerate = true) val i
                         var selected: Boolean
 ) {
     fun getFilePath(): String {
-        return CommonUtil.getPrivateDirectory() + "/" + filename
+        return CommonUtil.getPrivateDirectory() + filename
     }
 }

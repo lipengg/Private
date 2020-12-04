@@ -13,15 +13,13 @@ import androidx.databinding.ObservableList
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
-import com.example.album.databinding.ItemImageBinding
 import com.example.album.databinding.ItemPrivateImageBinding
-import com.example.model.bean.Image
 import com.example.model.bean.PrivateImage
-import com.lipeng.utils.CommonUtil
+import java.io.File
 import java.lang.Exception
 
 
-class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.ImageViewHolder> {
+class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImageViewHolder> {
 
     private var imageList: ObservableArrayList<PrivateImage>
     private var listener: OnClickListener
@@ -34,16 +32,16 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.ImageViewHo
         imageList.addOnListChangedCallback(dataChangeListener)
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, p1: Int): ImageViewHolder {
+    override fun onCreateViewHolder(viewGroup: ViewGroup, p1: Int): PrivateImageViewHolder {
         var root = LayoutInflater.from(viewGroup.context).inflate(R.layout.item_private_image, viewGroup, false)
-        return ImageViewHolder(root)
+        return PrivateImageViewHolder(root)
     }
 
     override fun getItemCount(): Int {
         return imageList.size
     }
 
-    override fun onBindViewHolder(imageViewHolder: ImageViewHolder, position: Int) {
+    override fun onBindViewHolder(imageViewHolder: PrivateImageViewHolder, position: Int) {
         val image: PrivateImage = imageList[position]
         imageViewHolder.bind(image, listener, checkListener)
     }
@@ -79,7 +77,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.ImageViewHo
         fun onCheckedChanged(image: PrivateImage, isChecked: Boolean)
     }
 
-    class ImageViewHolder : RecyclerView.ViewHolder {
+    class PrivateImageViewHolder : RecyclerView.ViewHolder {
         private var mBinding: ItemPrivateImageBinding? = null
 
         constructor(itemView: View) : super(itemView) {

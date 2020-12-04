@@ -46,7 +46,7 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_image_list.layoutManager = layoutManager
-        imageAdapter = ImageAdapter(mBinding!!.viewModel!!.images, object: ImageAdapter.OnClickListener{
+        imageAdapter = ImageAdapter(mViewModel.images, object: ImageAdapter.OnClickListener{
             override fun show(image: Image) {
                 showImage(image)
             }
@@ -68,9 +68,6 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
 
 
     override fun initData(savedInstanceState: Bundle?) {
-        mViewModel.encryptResult.observe(this, Observer {
-            findNavController().popBackStack()
-        })
         mViewModel.currentAlbum.observe(this, Observer {
             refreshAlbumList()
         })
