@@ -2,6 +2,7 @@ package com.example.album.fragment
 
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,13 +23,19 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
 
     override fun initView(root: View) {
         iv_add_image.setOnClickListener {
-            findNavController().navigate(R.id.galleryFragment)
+            mViewModel.loadImageList()
         }
         initRecycleView()
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
+        mViewModel.loadImageListResult.observe(this, Observer {
+            if (it) {
+                findNavController().navigate(R.id.galleryFragment)
+                mViewModel.loadImageListResult.value = false
+            }
+        })
         mViewModel.encrypt()
     }
 
@@ -60,6 +67,12 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         bundle.putString("path", image.getFilePath())
         findNavController().navigate(R.id.imageFragment, bundle)
     }
+
+    override fun onDestroyView() {
+        mViewModel.loadImageListResult.removeObservers(this);
+        super.onDestroyView()
+    }
+
     companion object {
         const val SPAN_COUNT = 4
     }

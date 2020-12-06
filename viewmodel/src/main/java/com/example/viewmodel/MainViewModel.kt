@@ -22,6 +22,7 @@ import java.util.HashSet
 
 class MainViewModel: BaseViewModel() {
     var result = MutableLiveData<String>()
+    var loadImageListResult = MutableLiveData<Boolean>()
 
     var imageFolders = ObservableArrayList<ImageFolder>()
     var images = ObservableArrayList<Image>()
@@ -51,11 +52,11 @@ class MainViewModel: BaseViewModel() {
         mApplication = application
         selectInfo.value = "退出"
         updateEncryptImage()
-        getImageList()
+        //getImageList()
         return this
     }
 
-    private fun getImageList() {
+    fun loadImageList() {
         if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
             //Toast.makeText(context, "当前存储卡不可用", Toast.LENGTH_SHORT).show()
             result.value = "当前存储卡不可用"
@@ -74,9 +75,10 @@ class MainViewModel: BaseViewModel() {
             currentAlbum.value = tempFolders[0]
             images.addAll(allImages)
             imageFolders.addAll(tempFolders)
-            initialled.value = true
-        }, {
             result.value = ""
+            loadImageListResult.value = true
+        }, {
+            result.value = "相册加载失败!"
             Log.e("MainViewModel","getImageList failed! Error: " + it.message)
         }))
     }
@@ -91,6 +93,7 @@ class MainViewModel: BaseViewModel() {
                 encryptImages.add(privateImage)
             }
             encryptResult.value = true
+            initialled.value = true
         },{
             Log.e("MainViewModel","encrypt insert")
         })
@@ -185,7 +188,7 @@ class MainViewModel: BaseViewModel() {
             images.clear()
             images.addAll(tempImages)
         }, {
-            result.value = ""
+            result.value = "打开图库失败!"
             Log.e("MainViewModel","selectAlbum failed! Error: " + it.message)
         }))
 
@@ -230,6 +233,16 @@ class MainViewModel: BaseViewModel() {
             val picSize = parentFile.list { dir, s ->
                 s.endsWith(".jpg") || s.endsWith(".jpeg") || s.endsWith(".png")
             }.size
+
+
+            /*val picSize = cr.query(
+                muri,
+                null,
+                MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? ",
+                arrayOf("image/jpg", "image/jpeg", "image/png"),
+                MediaStore.Images.Media.DATE_MODIFIED
+            )?.count*/
+
             imageFolder.size = picSize
         }
         cursor.close()
