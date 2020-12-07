@@ -27,7 +27,6 @@ class MainViewModel: BaseViewModel() {
     var imageFolders = ObservableArrayList<ImageFolder>()
     var images = ObservableArrayList<Image>()
     var tempFolders = ArrayList<ImageFolder>()
-    var tempImages = ArrayList<Image>()
     var allImages = ArrayList<Image>()
 
     var initialled = MutableLiveData<Boolean>()
@@ -65,6 +64,8 @@ class MainViewModel: BaseViewModel() {
 
         mDisPosable.add(Flowable.just(1).flatMap {
             try {
+                allImages.clear()
+                tempFolders.clear()
                 scanImages()
             } catch (e: Exception) {
                 throw Throwable(e.message)
@@ -72,6 +73,9 @@ class MainViewModel: BaseViewModel() {
 
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            images.clear()
+            imageFolders.clear()
+
             currentAlbum.value = tempFolders[0]
             images.addAll(allImages)
             imageFolders.addAll(tempFolders)
@@ -164,24 +168,23 @@ class MainViewModel: BaseViewModel() {
             images.addAll(allImages)
             return
         }
-        mDisPosable.add(Flowable.just(album).flatMap {
-            tempImages.clear()
-            //val parentFile = File(it.firstImagePath).parentFile
-            val parentFile = File(it.dir)
-            if (parentFile != null) {
-                parentFile.list{dir: File, name: String ->
-                    if (name.endsWith(".jpg") ||
-                        name.endsWith(".jpeg") ||
-                        name.endsWith(".png")) {
-                        tempImages.add(Image(name, dir.path + "/" + name, false))
-                        return@list true
-                    }
-                    return@list false
+        var tempImages = ArrayList<Image>()
+        mDisPosable.add(Flowable.just(album).flatMap { it ->
+            mApplication!!.contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null,
+                MediaStore.Images.Media.DATA + " like ?",
+                arrayOf(it.dir + "%"),
+                MediaStore.Images.Media.DATE_MODIFIED
+            )?.let{cursor->
+                val count = cursor!!.count
+                for (i in count - 1 downTo 0) {
+                    cursor.moveToPosition(i)
+                    val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
+                    tempImages.add(Image(File(path).name, path, false))
                 }
-            } else {
-                throw NullAlbumDirectoryException("Album " + it.dirName + " Directory is null")
+                cursor.close()
             }
-
             return@flatMap Flowable.just(true)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             currentAlbum.value = album
@@ -200,8 +203,8 @@ class MainViewModel: BaseViewModel() {
         val cursor = cr.query(
             muri,
             null,
-            MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? ",
-            arrayOf("image/jpg", "image/jpeg", "image/png"),
+            null,
+            null,
             MediaStore.Images.Media.DATE_MODIFIED
         )
         var albumId = 0
@@ -220,30 +223,24 @@ class MainViewModel: BaseViewModel() {
             allImages.add(imgBean)
             val parentFile = File(path).parentFile ?: continue
             val dirPath = parentFile.absolutePath
-            var imageFolder: ImageFolder? = null
-            if (dirPaths.contains(dirPath)) {
+            if (parentFile.name =="0" || dirPaths.contains(dirPath)) {
                 continue
             } else {
                 dirPaths.add(dirPath)
-                imageFolder = ImageFolder(albumId, dirPath, path, parentFile.name, 0, false, 1)
+                var imageFolder: ImageFolder = ImageFolder(albumId, dirPath, path, parentFile.name, 0, false, 1)
                 tempFolders.add(imageFolder)
                 albumId += 1
+
+                cr.query(
+                    muri,
+                    null,
+                    MediaStore.Images.Media.DATA + " like ?",
+                    arrayOf("$dirPath%"),
+                    MediaStore.Images.Media.DATE_MODIFIED
+                )?.count?.let{
+                    imageFolder.size = it
+                }
             }
-            if (parentFile.list() == null) continue
-            val picSize = parentFile.list { dir, s ->
-                s.endsWith(".jpg") || s.endsWith(".jpeg") || s.endsWith(".png")
-            }.size
-
-
-            /*val picSize = cr.query(
-                muri,
-                null,
-                MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? or " + MediaStore.Images.Media.MIME_TYPE + " = ? ",
-                arrayOf("image/jpg", "image/jpeg", "image/png"),
-                MediaStore.Images.Media.DATE_MODIFIED
-            )?.count*/
-
-            imageFolder.size = picSize
         }
         cursor.close()
         /*val message = Message.obtain()
