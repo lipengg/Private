@@ -94,9 +94,10 @@ class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
                 var checkbox = itemView.findViewById<CheckBox>(R.id.cb_image_selector)
                 checkbox.isChecked = image.selected
                 checkListener?.let{
-                    checkbox.setOnCheckedChangeListener { _, isChecked ->
-                        it.onCheckedChanged(image, isChecked)
-                        image.selected = isChecked
+                    checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+                        if (buttonView.isPressed) {
+                            it.onCheckedChanged(image, isChecked)
+                        }
                     }
                 }
                 if (checkListener == null) {

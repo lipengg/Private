@@ -134,6 +134,7 @@ class MainViewModel: BaseViewModel() {
 
     fun checkImage(image: Image, isChecked: Boolean) {
         try {
+            image.selected = isChecked
             if (isChecked) {
                 selectedImages.add(image)
             } else {
@@ -141,6 +142,14 @@ class MainViewModel: BaseViewModel() {
                     if (img.path == image.path) {
                         selectedImages.remove(img)
                         break
+                    }
+                }
+            }
+
+            if (currentAlbum.value!!.id != totalAlbumId) {
+                for (img in allImages) {
+                    if (img.path == image.path) {
+                        img.selected = isChecked
                     }
                 }
             }
@@ -156,6 +165,14 @@ class MainViewModel: BaseViewModel() {
             Log.e("MainViewModel", "checkImage Error:" + e.message)
         }
 
+    }
+
+    private fun getImageSelectStatus(path: String): Boolean {
+        for (image in selectedImages) {
+            if (image.path == path)
+                return true
+        }
+        return false
     }
 
     fun selectAlbum(album: ImageFolder) {
@@ -181,7 +198,7 @@ class MainViewModel: BaseViewModel() {
                 for (i in count - 1 downTo 0) {
                     cursor.moveToPosition(i)
                     val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
-                    tempImages.add(Image(File(path).name, path, false))
+                    tempImages.add(Image(File(path).name, path, getImageSelectStatus(path)))
                 }
                 cursor.close()
             }
@@ -223,11 +240,18 @@ class MainViewModel: BaseViewModel() {
             allImages.add(imgBean)
             val parentFile = File(path).parentFile ?: continue
             val dirPath = parentFile.absolutePath
-            if (parentFile.name =="0" || dirPaths.contains(dirPath)) {
+            if (dirPaths.contains(dirPath)) {
                 continue
             } else {
                 dirPaths.add(dirPath)
                 var imageFolder: ImageFolder = ImageFolder(albumId, dirPath, path, parentFile.name, 0, false, 1)
+                if (parentFile.name == "0") {
+                    // parentFile.name为"0"代表外存储根目录
+                    // TODO: 还需要测试下插sd卡的手机, sd卡中图片的根目录是多少
+                    imageFolder.dirName = "外部存储"
+/*                    imageFolder.selected = true
+                    totalAlbumId = imageFolder.id*/
+                }
                 tempFolders.add(imageFolder)
                 albumId += 1
 
