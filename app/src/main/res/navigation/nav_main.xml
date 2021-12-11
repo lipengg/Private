@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_mainFragment_to_imageFragment"
             app:destination="@id/imageFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_recycleFragment"
+            app:destination="@id/recycleFragment" />
     </fragment>
     <fragment
         android:id="@+id/galleryFragment"
@@ -31,4 +34,9 @@
         android:name="com.example.album.fragment.ImageFragment"
         android:label="fragment_image"
         tools:layout="@layout/fragment_image" />
+    <fragment
+        android:id="@+id/recycleFragment"
+        android:name="com.example.album.fragment.RecycleFragment"
+        android:label="fragment_recycle"
+        tools:layout="@layout/fragment_recycle" />
 </navigation>
