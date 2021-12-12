@@ -7,6 +7,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.example.model.bean.Image
 import com.example.model.bean.ImageFolder
 import com.example.model.bean.PrivateImage
@@ -21,6 +22,11 @@ import java.lang.Exception
 import java.util.HashSet
 
 class MainViewModel: BaseViewModel() {
+    val imageFlag = 0
+    val videoFlag = 1
+
+    var pageFlag = MutableLiveData<Int>()
+
     var result = MutableLiveData<String>()
     var loadImageListResult = MutableLiveData<Boolean>()
 
@@ -49,10 +55,15 @@ class MainViewModel: BaseViewModel() {
 
     fun initial(application: Application): MainViewModel {
         mApplication = application
+        pageFlag.value = imageFlag
         selectInfo.value = "退出"
         updateEncryptImage()
         //getImageList()
         return this
+    }
+
+    fun reloadPageInfo() {
+        Log.e("MainViewModel", pageFlag.value?.toString())
     }
 
     fun loadImageList() {

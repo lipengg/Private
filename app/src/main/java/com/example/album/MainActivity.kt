@@ -7,24 +7,32 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.album.fragment.MainFragment
 import com.example.viewmodel.MainViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     //var viewModel: MainViewModel? = null
-    private var TAG = "MainActivity"
+    private val TAG = "MainActivity"
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        savedInstanceState?.let{arg->
+            MainViewModel.getInstance().pageFlag.value = arg.getInt("flag")
+        }
+        Log.e(TAG, "pageFlag value is $MainViewModel.getInstance().pageFlag")
 
         MainViewModel.getInstance().result.observe(this, Observer {
             if (it.isNotEmpty()) {
@@ -32,19 +40,30 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        MainViewModel.getInstance().pageFlag.observe(this, Observer {
+            MainViewModel.getInstance().reloadPageInfo()
+        })
+
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav_view)
         bottomNav.setOnNavigationItemSelectedListener{item->
             when (item.itemId) {
-                R.id.bottom_nav_image -> {
-                    Log.e(TAG, "open image page: ")
-                    findNavController(R.id.nav_main_fragment).navigate(R.id.mainFragment)
+                R.id.bottom_nav_image, R.id.bottom_nav_video -> {
+                    val flag = if(item.itemId == R.id.bottom_nav_image) MainViewModel.getInstance().imageFlag else MainViewModel.getInstance().videoFlag
+                    MainViewModel.getInstance().pageFlag.value = flag
+//                    nav_main_fragment.findNavController().currentDestination?.let {
+//                        if (it.id == R.id.mainFragment) {
+//                            MainViewModel.getInstance().pageFlag.value = flag
+//                        } else {
+//                            val bundle = bundleOf("flag" to flag)
+//                            findNavController(R.id.nav_main_fragment).navigate(
+//                                R.id.mainFragment,
+//                                bundle
+//                            )
+//                        }
+//                    }
                     return@setOnNavigationItemSelectedListener true
                 }
-                R.id.bottom_nav_video -> {
-                    Log.e(TAG, "open video page: ")
-                    findNavController(R.id.nav_main_fragment).navigate(R.id.mainFragment)
-                    return@setOnNavigationItemSelectedListener true
-                }
+
             }
             false
         }
