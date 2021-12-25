@@ -24,12 +24,14 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
 
     private var imageList: ObservableArrayList<PrivateFile>
     private var listener: OnClickListener
-    private var checkListener: OnCheckedChangeListener?
+    private var checkListener: OnCheckedChangeListener
+    private var longClickListener: OnLongClickListener
 
-    constructor(imageList: ObservableArrayList<PrivateFile>, listener : OnClickListener, checkListener: OnCheckedChangeListener?) {
+    constructor(imageList: ObservableArrayList<PrivateFile>, listener : OnClickListener, checkListener: OnCheckedChangeListener, longClickListener: OnLongClickListener) {
         this.imageList = imageList
         this.listener = listener
         this.checkListener = checkListener
+        this.longClickListener = longClickListener
         imageList.addOnListChangedCallback(dataChangeListener)
     }
 
@@ -44,7 +46,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
 
     override fun onBindViewHolder(imageViewHolder: PrivateImageViewHolder, position: Int) {
         val image: PrivateFile = imageList[position]
-        imageViewHolder.bind(image, listener, checkListener)
+        imageViewHolder.bind(image, listener, checkListener, longClickListener)
     }
 
 
@@ -74,6 +76,10 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
         fun show(image: PrivateFile)
     }
 
+    interface OnLongClickListener {
+        fun enterEditModel()
+    }
+
     interface OnCheckedChangeListener {
         fun onCheckedChanged(image: PrivateFile, isChecked: Boolean)
     }
@@ -85,7 +91,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
             mBinding = DataBindingUtil.bind(itemView)
         }
 
-        fun bind(@NonNull image: PrivateFile, listener: OnClickListener, checkListener: OnCheckedChangeListener?) {
+        fun bind(@NonNull image: PrivateFile, listener: OnClickListener, checkListener: OnCheckedChangeListener, longClickListener: OnLongClickListener) {
             mBinding!!.image = image
             try {
                 var imageView = itemView.findViewById<ImageView>(R.id.iv_private_thumbnail)
@@ -93,6 +99,11 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
                 imageView.setOnClickListener{
                     listener.show(image)
                 }
+                imageView.setOnLongClickListener{
+                    longClickListener.enterEditModel()
+                    return@setOnLongClickListener true
+                }
+
                 var checkbox = itemView.findViewById<CheckBox>(R.id.cb_private_image_selector)
                 checkbox.isChecked = image.selected
                 checkListener?.let{

@@ -23,8 +23,12 @@ import java.util.HashSet
 typealias MyFile = com.example.model.bean.File
 
 class MainViewModel: BaseViewModel() {
+    // ***********************常量***********************
     val imageFlag = PrivateFileType.IMAGE.value
     val videoFlag = PrivateFileType.VIDEO.value
+
+    private val viewModel = 0
+    private val editModel = 1
 
     var pageFlag = MutableLiveData<Int>()
 
@@ -47,8 +51,6 @@ class MainViewModel: BaseViewModel() {
 
     var encryptResult = MutableLiveData<Boolean>()
 
-
-    //*****************
     var folders = ObservableArrayList<Folder>()
     var files = ObservableArrayList<MyFile>()
     var allFiles = ArrayList<MyFile>()
@@ -56,16 +58,23 @@ class MainViewModel: BaseViewModel() {
     var currentFolder = MutableLiveData<Folder>()
     var loadFileListResult = MutableLiveData<Boolean>()
 
+    var pageModel = MutableLiveData<Int>()
+
 /*    constructor(mApplication: Application):super(mApplication) {
         //getImageList()
     }*/
 
     fun initial(application: Application): MainViewModel {
         mApplication = application
+        pageModel.value = viewModel
         pageFlag.value = imageFlag
         selectInfo.value = "退出"
         updateEncryptFile(true)
         return this
+    }
+
+    fun switchModel() {
+        if(pageModel.value == viewModel) pageModel.value = editModel else pageModel.value = viewModel
     }
 
     fun reloadPageInfo() {
@@ -173,6 +182,10 @@ class MainViewModel: BaseViewModel() {
             Log.e("MainViewModel","encrypt insert")
         })
 
+
+    }
+
+    fun checkPrivateFile(file: PrivateFile, isChecked: Boolean) {
 
     }
 

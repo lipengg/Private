@@ -6,12 +6,14 @@
         <variable
             name="viewModel"
             type="com.example.viewmodel.MainViewModel" />
+        <import type="android.view.View"/>
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/ll_select_image_operation"
+            android:background="@color/dimGray"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -19,13 +21,36 @@
             app:layout_constraintTop_toTopOf="parent">
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/iv_add_image"
+                android:paddingRight="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_add_image_24"
-                android:layout_gravity="end"
-                android:padding="10dp"
+                android:visibility="@{viewModel.pageModel == 0 ? View.VISIBLE : View.INVISIBLE}"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_del_encrypt_file"
+                android:minHeight="0dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:visibility="@{viewModel.pageModel == 0 ? View.INVISIBLE : View.VISIBLE}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/delete"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_recover_encrypt_file"
+                android:minHeight="0dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:visibility="@{viewModel.pageModel == 0 ? View.INVISIBLE : View.VISIBLE}"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/recover"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView

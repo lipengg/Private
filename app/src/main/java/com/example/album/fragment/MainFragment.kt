@@ -59,7 +59,17 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
             override fun show(image: PrivateFile) {
                 showImage(image)
             }
-        }, null)
+        }, object: PrivateImageAdapter.OnCheckedChangeListener {
+            override fun onCheckedChanged(file: PrivateFile, isChecked: Boolean) {
+                mViewModel.checkPrivateFile(file, isChecked)
+            }
+        }, object: PrivateImageAdapter.OnLongClickListener {
+            override fun enterEditModel() {
+                // 如果当前在查看模式长按进入编码模式, 已经是编辑模式长按无效
+                if(mViewModel.pageModel.value == 0)
+                    mViewModel.switchModel()
+            }
+        })
         rv_selected_image_list.adapter = imageAdapter
     }
 
