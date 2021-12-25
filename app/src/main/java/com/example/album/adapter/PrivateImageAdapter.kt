@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
 import com.example.album.databinding.ItemPrivateImageBinding
+import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateImage
 import java.io.File
 import java.lang.Exception
@@ -21,11 +22,11 @@ import java.lang.Exception
 
 class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImageViewHolder> {
 
-    private var imageList: ObservableArrayList<PrivateImage>
+    private var imageList: ObservableArrayList<PrivateFile>
     private var listener: OnClickListener
     private var checkListener: OnCheckedChangeListener?
 
-    constructor(imageList: ObservableArrayList<PrivateImage>, listener : OnClickListener, checkListener: OnCheckedChangeListener?) {
+    constructor(imageList: ObservableArrayList<PrivateFile>, listener : OnClickListener, checkListener: OnCheckedChangeListener?) {
         this.imageList = imageList
         this.listener = listener
         this.checkListener = checkListener
@@ -42,7 +43,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
     }
 
     override fun onBindViewHolder(imageViewHolder: PrivateImageViewHolder, position: Int) {
-        val image: PrivateImage = imageList[position]
+        val image: PrivateFile = imageList[position]
         imageViewHolder.bind(image, listener, checkListener)
     }
 
@@ -70,11 +71,11 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
     }
 
     interface OnClickListener {
-        fun show(image: PrivateImage)
+        fun show(image: PrivateFile)
     }
 
     interface OnCheckedChangeListener {
-        fun onCheckedChanged(image: PrivateImage, isChecked: Boolean)
+        fun onCheckedChanged(image: PrivateFile, isChecked: Boolean)
     }
 
     class PrivateImageViewHolder : RecyclerView.ViewHolder {
@@ -84,7 +85,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
             mBinding = DataBindingUtil.bind(itemView)
         }
 
-        fun bind(@NonNull image: PrivateImage, listener: OnClickListener, checkListener: OnCheckedChangeListener?) {
+        fun bind(@NonNull image: PrivateFile, listener: OnClickListener, checkListener: OnCheckedChangeListener?) {
             mBinding!!.image = image
             try {
                 var imageView = itemView.findViewById<ImageView>(R.id.iv_private_thumbnail)

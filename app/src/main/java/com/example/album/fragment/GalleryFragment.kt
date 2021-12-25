@@ -16,6 +16,8 @@ import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentGalleryBinding
+import com.example.model.bean.File
+import com.example.model.bean.Folder
 import com.example.model.bean.Image
 import com.example.model.bean.ImageFolder
 import com.example.viewmodel.MainViewModel
@@ -46,20 +48,20 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_image_list.layoutManager = layoutManager
-        imageAdapter = ImageAdapter(mViewModel.images, object: ImageAdapter.OnClickListener{
-            override fun show(image: Image) {
+        imageAdapter = ImageAdapter(mViewModel.files, object: ImageAdapter.OnClickListener{
+            override fun show(image: File) {
                 showImage(image)
             }
 
         }, object : ImageAdapter.OnCheckedChangeListener {
-            override fun onCheckedChanged(image: Image, isChecked: Boolean) {
-                mViewModel.checkImage(image, isChecked)
+            override fun onCheckedChanged(image: File, isChecked: Boolean) {
+                mViewModel.checkFile(image, isChecked)
             }
         })
         rv_image_list.adapter = imageAdapter
     }
 
-    fun showImage(image: Image) {
+    fun showImage(image: File) {
         var bundle = Bundle()
         bundle.putString("path", image.path)
         var navController = findNavController()
@@ -68,7 +70,7 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
 
 
     override fun initData(savedInstanceState: Bundle?) {
-        mViewModel.currentAlbum.observe(this, Observer {
+        mViewModel.currentFolder.observe(this, Observer {
             refreshAlbumList()
         })
     }
@@ -93,9 +95,9 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
             var root = LayoutInflater.from(requireContext()).inflate(R.layout.pop_album, null)
             var albumList = root.findViewById<RecyclerView>(R.id.rv_gallery_list)
             if (albumAdapter == null) {
-                albumAdapter = AlbumAdapter(MainViewModel.getInstance().imageFolders, object: AlbumAdapter.OnSelectListener{
-                    override fun select(album: ImageFolder) {
-                        MainViewModel.getInstance().selectAlbum(album)
+                albumAdapter = AlbumAdapter(MainViewModel.getInstance().folders, object: AlbumAdapter.OnSelectListener{
+                    override fun select(album: Folder) {
+                        MainViewModel.getInstance().selectFolder(album)
                         albumPopupWindow?.dismiss()
                     }
 

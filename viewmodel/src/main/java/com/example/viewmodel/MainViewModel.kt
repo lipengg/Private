@@ -2,15 +2,14 @@ package com.example.viewmodel
 
 import android.app.Application
 import android.content.ContentResolver
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.example.model.bean.Image
-import com.example.model.bean.ImageFolder
-import com.example.model.bean.PrivateImage
+import com.example.model.bean.*
 import com.example.model.database.DatabaseManager
 import com.example.viewmodel.base.BaseViewModel
 import com.example.viewmodel.utils.FileUtils
@@ -21,33 +20,41 @@ import java.io.File
 import java.lang.Exception
 import java.util.HashSet
 
+typealias MyFile = com.example.model.bean.File
+
 class MainViewModel: BaseViewModel() {
-    val imageFlag = 0
-    val videoFlag = 1
+    val imageFlag = PrivateFileType.IMAGE.value
+    val videoFlag = PrivateFileType.VIDEO.value
 
     var pageFlag = MutableLiveData<Int>()
 
     var result = MutableLiveData<String>()
-    var loadImageListResult = MutableLiveData<Boolean>()
 
-    var imageFolders = ObservableArrayList<ImageFolder>()
-    var images = ObservableArrayList<Image>()
-    var tempFolders = ArrayList<ImageFolder>()
-    var allImages = ArrayList<Image>()
+    var tempFolders = ArrayList<Folder>()
+
+
 
     var initialled = MutableLiveData<Boolean>()
 
-    var currentAlbum = MutableLiveData<ImageFolder>()
-    var totalAlbumId = 0
+    private var totalFolderId = 0
 
-    var selectedImages = ArrayList<Image>()
-    var encryptImages = ObservableArrayList<PrivateImage>()
+    var selectedFiles = ArrayList<MyFile>()
+    var encryptFiles = ObservableArrayList<PrivateFile>()
 
     var selectNumber = MutableLiveData<Int>()
 
     var selectInfo = MutableLiveData<String>()
 
     var encryptResult = MutableLiveData<Boolean>()
+
+
+    //*****************
+    var folders = ObservableArrayList<Folder>()
+    var files = ObservableArrayList<MyFile>()
+    var allFiles = ArrayList<MyFile>()
+
+    var currentFolder = MutableLiveData<Folder>()
+    var loadFileListResult = MutableLiveData<Boolean>()
 
 /*    constructor(mApplication: Application):super(mApplication) {
         //getImageList()
@@ -57,16 +64,19 @@ class MainViewModel: BaseViewModel() {
         mApplication = application
         pageFlag.value = imageFlag
         selectInfo.value = "退出"
-        updateEncryptImage()
-        //getImageList()
+        updateEncryptFile(true)
         return this
     }
 
     fun reloadPageInfo() {
         Log.e("MainViewModel", pageFlag.value?.toString())
+        pageFlag.value?.let {
+            encryptFiles.clear()
+            updateEncryptFile()
+        }
     }
 
-    fun loadImageList() {
+    fun loadFileList() {
         if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
             //Toast.makeText(context, "当前存储卡不可用", Toast.LENGTH_SHORT).show()
             result.value = "当前存储卡不可用"
@@ -75,67 +85,90 @@ class MainViewModel: BaseViewModel() {
 
         mDisPosable.add(Flowable.just(1).flatMap {
             try {
-                allImages.clear()
+                allFiles.clear()
                 tempFolders.clear()
-                scanImages()
+                scanFiles()
             } catch (e: Exception) {
                 throw Throwable(e.message)
             }
 
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-            images.clear()
-            imageFolders.clear()
+            files.clear()
+            folders.clear()
 
-            currentAlbum.value = tempFolders[0]
-            images.addAll(allImages)
-            imageFolders.addAll(tempFolders)
+            currentFolder.value = tempFolders[0]
+            files.addAll(allFiles)
+            folders.addAll(tempFolders)
             result.value = ""
-            loadImageListResult.value = true
+            loadFileListResult.value = true
         }, {
-            result.value = "相册加载失败!"
-            Log.e("MainViewModel","getImageList failed! Error: " + it.message)
+            result.value = "文件加载失败!"
+            Log.e("MainViewModel","loadFileList failed! Error: " + it.message)
         }))
     }
 
-    private fun updateEncryptImage() {
+    private fun getPageFlag(): Int {
+        var flag = imageFlag
+        pageFlag.value?.let{
+            flag = it
+        }
+        return flag;
+    }
+
+    private fun getCurrentFileType(): Int {
+        return getPageFlag()
+    }
+
+    private fun getCurrentFileStatus(): Int {
+        return PrivateFileStatus.Valid.value
+    }
+
+    private fun getCurrentPageFiles() :List<PrivateFile> {
+        val type = getPageFlag()
+        val status = PrivateFileStatus.Valid.value
+        return DatabaseManager.dbManager.getPrivateFileDao().getFiles(type, status)
+    }
+
+    private fun updateEncryptFile(isInit: Boolean = false) {
         Flowable.just(1).flatMap {
-            var list = DatabaseManager.dbManager.getPrivateImageDao().getAll()
+            var list = getCurrentPageFiles()
             return@flatMap Flowable.just(list)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-            encryptImages.clear()
-            for (privateImage in it) {
-                encryptImages.add(privateImage)
+            encryptFiles.clear()
+            for (privateFile in it) {
+                encryptFiles.add(privateFile)
             }
             encryptResult.value = true
-            initialled.value = true
+            if(isInit)
+                initialled.value = true
         },{
             Log.e("MainViewModel","encrypt insert")
         })
     }
 
     fun encrypt() {
-        if (selectedImages.isEmpty()) {
+        if (selectedFiles.isEmpty()) {
             encryptResult.value = true
             return
         }
-        Flowable.just(selectedImages).flatMap {
-            var encryptList = ArrayList<PrivateImage>()
-            for (image in it) {
+        Flowable.just(selectedFiles).flatMap {
+            var encryptList = ArrayList<PrivateFile>()
+            for (myFile in it) {
                 var privateFilename = FileUtils.getImagePrivateFileName()
-                var privateImagePath = FileUtils.getPrivateDirectory() + privateFilename
-                var privateImage = PrivateImage(0, privateFilename, image.filename, image.path, false)
-                if(FileUtils.moveImage(image.path , privateImagePath, mApplication!!)) {
-                    encryptList.add(privateImage)
+                var privateFilePath = FileUtils.getPrivateDirectory() + privateFilename
+                var privateFile = PrivateFile(0, privateFilename, getCurrentFileType(), getCurrentFileStatus(), myFile.name, myFile.path, false)
+                if(FileUtils.moveImage(myFile.path , privateFilePath, mApplication!!)) {
+                    encryptList.add(privateFile)
                 } else {
-                    Log.i("MainViewModel", "move image failure!")
+                    Log.i("MainViewModel", "move file failure!")
                 }
             }
             it.clear()
-            DatabaseManager.dbManager.getPrivateImageDao().insert(encryptList)
+            DatabaseManager.dbManager.getPrivateFileDao().insert(encryptList)
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-            updateEncryptImage()
+            updateEncryptFile()
         },{
             Log.e("MainViewModel","encrypt insert")
         })
@@ -143,144 +176,163 @@ class MainViewModel: BaseViewModel() {
 
     }
 
-    fun checkImage(image: Image, isChecked: Boolean) {
+    fun checkFile(file: MyFile, isChecked: Boolean) {
         try {
-            image.selected = isChecked
+            file.selected = isChecked
             if (isChecked) {
-                selectedImages.add(image)
+                selectedFiles.add(file)
             } else {
-                for (img in selectedImages) {
-                    if (img.path == image.path) {
-                        selectedImages.remove(img)
+                for (sFile in selectedFiles) {
+                    if (sFile.path == file.path) {
+                        selectedFiles.remove(sFile)
                         break
                     }
                 }
             }
 
-            if (currentAlbum.value!!.id != totalAlbumId) {
-                for (img in allImages) {
-                    if (img.path == image.path) {
-                        img.selected = isChecked
+            if (currentFolder.value!!.id != totalFolderId) {
+                for (myFile in allFiles) {
+                    if (myFile.path == file.path) {
+                        myFile.selected = isChecked
                     }
                 }
             }
 
-            selectNumber.value = selectedImages.size
+            selectNumber.value = selectedFiles.size
 
-            if (selectedImages.size == 0) {
+            if (selectedFiles.size == 0) {
                 selectInfo.value = "退出"
             } else {
-                selectInfo.value = "确定(" + selectedImages.size + ")"
+                selectInfo.value = "确定(" + selectedFiles.size + ")"
             }
         } catch (e:Exception) {
-            Log.e("MainViewModel", "checkImage Error:" + e.message)
+            Log.e("MainViewModel", "checkFile Error:" + e.message)
         }
 
     }
 
-    private fun getImageSelectStatus(path: String): Boolean {
-        for (image in selectedImages) {
-            if (image.path == path)
+    private fun getFileSelectStatus(path: String): Boolean {
+        for (file in selectedFiles) {
+            if (file.path == path)
                 return true
         }
         return false
     }
 
-    fun selectAlbum(album: ImageFolder) {
-        if (album.id == currentAlbum.value!!.id) return
-        currentAlbum.value!!.selected = false
-        album.selected = true
-        if (totalAlbumId == album.id) {
-            currentAlbum.value = album
-            images.clear()
-            images.addAll(allImages)
+    private val uriMap = mapOf(imageFlag to MediaStore.Images.Media.EXTERNAL_CONTENT_URI, videoFlag to MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+    private val orderMap = mapOf(imageFlag to MediaStore.Images.Media.DATE_MODIFIED, videoFlag to MediaStore.Video.Media.DATE_MODIFIED)
+    private val dataColumnMap = mapOf(imageFlag to MediaStore.Images.Media.DATA, videoFlag to MediaStore.Video.Media.DATA)
+
+    private fun getCurrentUri(): Uri {
+        return uriMap.getOrElse(getPageFlag(), { MediaStore.Images.Media.EXTERNAL_CONTENT_URI });
+    }
+
+    private fun getCurrentOrder(): String {
+        return orderMap.getOrElse(getPageFlag(), { MediaStore.Images.Media.DATE_MODIFIED })
+    }
+
+    private fun getCurrentMediaData(): String {
+        return dataColumnMap.getOrElse(getPageFlag(), {MediaStore.Images.Media.DATA})
+    }
+
+    fun selectFolder(folder: Folder) {
+        if (folder.id == currentFolder.value!!.id) return
+        currentFolder.value!!.selected = false
+        folder.selected = true
+        if (totalFolderId == folder.id) {
+            currentFolder.value = folder
+            files.clear()
+            files.addAll(allFiles)
             return
         }
-        var tempImages = ArrayList<Image>()
-        mDisPosable.add(Flowable.just(album).flatMap { it ->
+        var flag = getPageFlag()
+        val mediaUri = getCurrentUri()
+        val sortOrder = getCurrentOrder()
+        var column = getCurrentMediaData()
+        var tempFiles = ArrayList<MyFile>()
+        mDisPosable.add(Flowable.just(folder).flatMap { it ->
+
             mApplication!!.contentResolver.query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    mediaUri,
                 null,
-                MediaStore.Images.Media.DATA + " like ?",
+                    "$column like ?",
                 arrayOf(it.dir + "%"),
-                MediaStore.Images.Media.DATE_MODIFIED
+                    sortOrder
             )?.let{cursor->
                 val count = cursor!!.count
                 for (i in count - 1 downTo 0) {
                     cursor.moveToPosition(i)
                     val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
-                    tempImages.add(Image(File(path).name, path, getImageSelectStatus(path)))
+                    tempFiles.add(MyFile(File(path).name, path, getFileSelectStatus(path)))
                 }
                 cursor.close()
             }
             return@flatMap Flowable.just(true)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-            currentAlbum.value = album
-            images.clear()
-            images.addAll(tempImages)
+            currentFolder.value = folder
+            files.clear()
+            files.addAll(tempFiles)
         }, {
-            result.value = "打开图库失败!"
-            Log.e("MainViewModel","selectAlbum failed! Error: " + it.message)
+            result.value = "打开文件目录失败!"
+            Log.e("MainViewModel","selectFolder failed! Error: " + it.message)
         }))
 
     }
 
-    private fun scanImages() {
-        val muri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    private fun scanFiles() {
+        var flag = getPageFlag()
+        val mediaUri = getCurrentUri()
+        val sortOrder = getCurrentOrder()
         val cr: ContentResolver = mApplication!!.contentResolver
         val cursor = cr.query(
-            muri,
+                mediaUri,
             null,
             null,
             null,
-            MediaStore.Images.Media.DATE_MODIFIED
+            sortOrder
         )
-        var albumId = 0
+        var folderId = 0
         val dirPaths: MutableSet<String> = HashSet()
         val count = cursor!!.count
+        var column = getCurrentMediaData()
         for (i in count - 1 downTo 0) {
             cursor.moveToPosition(i)
-            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
+            val path = cursor.getString(cursor.getColumnIndex(column))
             if (i == count - 1) {
-                val imageFolder = ImageFolder(albumId, "",path,"所有图片", count,true,0)
-                totalAlbumId = imageFolder.id
-                tempFolders.add(imageFolder)
-                albumId += 1
+                val folder = Folder(folderId, "",path,if(pageFlag.value == imageFlag) "所有图片" else "所有视频", count,true,0)
+                totalFolderId = folder.id
+                tempFolders.add(folder)
+                folderId += 1
             }
-            val imgBean = Image(File(path).name, path, false)
-            allImages.add(imgBean)
+            val fileBean = MyFile(File(path).name, path, false)
+            allFiles.add(fileBean)
             val parentFile = File(path).parentFile ?: continue
             val dirPath = parentFile.absolutePath
             if (dirPaths.contains(dirPath)) {
                 continue
             } else {
                 dirPaths.add(dirPath)
-                var imageFolder: ImageFolder = ImageFolder(albumId, dirPath, path, parentFile.name, 0, false, 1)
+                var folder = Folder(folderId, dirPath, path, parentFile.name, 0, false, 1)
                 if (parentFile.name == "0") {
                     // parentFile.name为"0"代表外存储根目录
                     // TODO: 还需要测试下插sd卡的手机, sd卡中图片的根目录是多少
-                    imageFolder.dirName = "外部存储"
-/*                    imageFolder.selected = true
-                    totalAlbumId = imageFolder.id*/
+                    folder.dirName = "外部存储"
                 }
-                tempFolders.add(imageFolder)
-                albumId += 1
+                tempFolders.add(folder)
+                folderId += 1
 
                 cr.query(
-                    muri,
+                        mediaUri,
                     null,
-                    MediaStore.Images.Media.DATA + " like ?",
+                        "$column like ?",
                     arrayOf("$dirPath%"),
-                    MediaStore.Images.Media.DATE_MODIFIED
+                        sortOrder
                 )?.count?.let{
-                    imageFolder.size = it
+                    folder.size = it
                 }
             }
         }
         cursor.close()
-        /*val message = Message.obtain()
-        message.what = 0x001
-        handler.sendMessage(message)*/
     }
 
     inner class NullAlbumDirectoryException(message: String): Exception(message)

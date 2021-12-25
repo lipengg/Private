@@ -10,6 +10,7 @@ import com.example.album.R
 import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentMainBinding
+import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateImage
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
@@ -23,17 +24,17 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
 
     override fun initView(root: View) {
         iv_add_image.setOnClickListener {
-            mViewModel.loadImageList()
+            mViewModel.loadFileList()
         }
         initRecycleView()
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
-        mViewModel.loadImageListResult.observe(this, Observer {
+        mViewModel.loadFileListResult.observe(this, Observer {
             if (it) {
                 findNavController().navigate(R.id.galleryFragment)
-                mViewModel.loadImageListResult.value = false
+                mViewModel.loadFileListResult.value = false
             }
         })
         mViewModel.encrypt()
@@ -54,22 +55,22 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_selected_image_list.layoutManager = layoutManager
-        imageAdapter = PrivateImageAdapter(mViewModel.encryptImages, object: PrivateImageAdapter.OnClickListener{
-            override fun show(image: PrivateImage) {
+        imageAdapter = PrivateImageAdapter(mViewModel.encryptFiles, object: PrivateImageAdapter.OnClickListener{
+            override fun show(image: PrivateFile) {
                 showImage(image)
             }
         }, null)
         rv_selected_image_list.adapter = imageAdapter
     }
 
-    fun showImage(image: PrivateImage) {
+    fun showImage(image: PrivateFile) {
         var bundle = Bundle()
         bundle.putString("path", image.getFilePath())
         findNavController().navigate(R.id.imageFragment, bundle)
     }
 
     override fun onDestroyView() {
-        mViewModel.loadImageListResult.removeObservers(this);
+        mViewModel.loadFileListResult.removeObservers(this);
         super.onDestroyView()
     }
 

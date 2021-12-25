@@ -5,7 +5,7 @@
     <data>
         <variable
             name="folder"
-            type="com.example.model.bean.ImageFolder" />
+            type="com.example.model.bean.Folder" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ll_album"

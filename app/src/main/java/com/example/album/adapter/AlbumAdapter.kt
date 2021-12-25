@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
 import com.example.album.databinding.ItemAlbumBinding
+import com.example.model.bean.Folder
 import com.example.model.bean.ImageFolder
 
 class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
-    private var folderList: ObservableArrayList<ImageFolder>
+    private var folderList: ObservableArrayList<Folder>
     private var listener: OnSelectListener
 
-    constructor(folderList: ObservableArrayList<ImageFolder>, listener : OnSelectListener) {
+    constructor(folderList: ObservableArrayList<Folder>, listener : OnSelectListener) {
         this.folderList = folderList
         this.listener = listener
         folderList.addOnListChangedCallback(dataChangeListener)
@@ -34,7 +35,7 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
     }
 
     override fun onBindViewHolder(imageViewHolder: AlbumViewHolder, position: Int) {
-        val folder: ImageFolder = folderList[position]
+        val folder: Folder = folderList[position]
         imageViewHolder.bind(folder, listener)
     }
 
@@ -62,7 +63,7 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
     }
 
     interface OnSelectListener {
-        fun select(album: ImageFolder)
+        fun select(album: Folder)
     }
 
     class AlbumViewHolder : RecyclerView.ViewHolder {
@@ -72,9 +73,9 @@ class AlbumAdapter : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
             mBinding = DataBindingUtil.bind(itemView)
         }
 
-        fun bind(@NonNull folder: ImageFolder, listener: OnSelectListener) {
+        fun bind(@NonNull folder: Folder, listener: OnSelectListener) {
             mBinding!!.folder = folder
-            Glide.with(itemView.context.applicationContext).load(folder.firstImagePath).into(itemView.findViewById(
+            Glide.with(itemView.context.applicationContext).load(folder.firstFilePath).into(itemView.findViewById(
                 R.id.iv_cover))
             itemView.findViewById<AppCompatTextView>(R.id.tv_gallery_name).text = folder.dirName
             itemView.findViewById<AppCompatTextView>(R.id.tv_image_size).text = "(" + folder.size.toString() + ")"

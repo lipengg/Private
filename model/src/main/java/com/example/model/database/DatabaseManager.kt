@@ -4,12 +4,12 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.model.bean.PrivateImage
-import com.example.model.database.dao.PrivateImageDao
+import com.example.model.bean.PrivateFile
+import com.example.model.database.dao.PrivateFileDao
 
-@Database(entities = [PrivateImage::class], version = 1)
+@Database(entities = [PrivateFile::class], version = 1)
 abstract class DatabaseManager:RoomDatabase() {
-    abstract fun getPrivateImageDao(): PrivateImageDao
+    abstract fun getPrivateFileDao(): PrivateFileDao
     companion object {
         lateinit var dbManager: DatabaseManager
         @JvmStatic

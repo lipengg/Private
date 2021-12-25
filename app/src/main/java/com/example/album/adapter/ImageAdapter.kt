@@ -14,17 +14,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
 import com.example.album.databinding.ItemImageBinding
+import com.example.model.bean.File
 import com.example.model.bean.Image
 import java.lang.Exception
 
 
 class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
 
-    private var imageList: ObservableArrayList<Image>
+    private var imageList: ObservableArrayList<File>
     private var listener: OnClickListener
     private var checkListener: OnCheckedChangeListener?
 
-    constructor(imageList: ObservableArrayList<Image>, listener : OnClickListener, checkListener: OnCheckedChangeListener?) {
+    constructor(imageList: ObservableArrayList<File>, listener : OnClickListener, checkListener: OnCheckedChangeListener?) {
         this.imageList = imageList
         this.listener = listener
         this.checkListener = checkListener
@@ -41,7 +42,7 @@ class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
     }
 
     override fun onBindViewHolder(imageViewHolder: ImageViewHolder, position: Int) {
-        val image: Image = imageList[position]
+        val image: File = imageList[position]
         imageViewHolder.bind(image, listener, checkListener)
     }
 
@@ -69,11 +70,11 @@ class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
     }
 
     interface OnClickListener {
-        fun show(image: Image)
+        fun show(image: File)
     }
 
     interface OnCheckedChangeListener {
-        fun onCheckedChanged(image: Image, isChecked: Boolean)
+        fun onCheckedChanged(image: File, isChecked: Boolean)
     }
 
     class ImageViewHolder : RecyclerView.ViewHolder {
@@ -83,7 +84,7 @@ class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
             mBinding = DataBindingUtil.bind(itemView)
         }
 
-        fun bind(@NonNull image: Image, listener: OnClickListener, checkListener: OnCheckedChangeListener?) {
+        fun bind(@NonNull image: File, listener: OnClickListener, checkListener: OnCheckedChangeListener?) {
             mBinding!!.image = image
             try {
                 var imageView = itemView.findViewById<ImageView>(R.id.iv_thumbnail)
