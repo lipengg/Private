@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if(MainViewModel.getInstance().pageModel.value == 1) {
             MainViewModel.getInstance().switchModel()
+            MainViewModel.getInstance().resetSelectPrivateFile()
             return
         }
         MainViewModel.getInstance().resetSelectFile()

@@ -42,7 +42,8 @@ class MainViewModel: BaseViewModel() {
 
     private var totalFolderId = 0
 
-    var selectedFiles = ArrayList<MyFile>()
+    private var selectedFiles = ArrayList<MyFile>()
+    var selectedPrivateFiles = ArrayList<PrivateFile>()
     var encryptFiles = ObservableArrayList<PrivateFile>()
 
     var selectNumber = MutableLiveData<Int>()
@@ -68,6 +69,7 @@ class MainViewModel: BaseViewModel() {
         mApplication = application
         pageModel.value = viewModel
         pageFlag.value = imageFlag
+        selectNumber.value = 0
         selectInfo.value = "退出"
         updateEncryptFile(true)
         return this
@@ -162,8 +164,13 @@ class MainViewModel: BaseViewModel() {
         selectInfo.value = "退出"
     }
 
-    fun clearSelectPrivateFile() {
-
+    fun resetSelectPrivateFile() {
+        for (sFile in selectedPrivateFiles) {
+            sFile.selected = false
+        }
+        selectedPrivateFiles.clear()
+        selectNumber.value = 0
+        selectInfo.value = "退出"
     }
 
     fun encrypt() {
@@ -196,7 +203,29 @@ class MainViewModel: BaseViewModel() {
     }
 
     fun checkPrivateFile(file: PrivateFile, isChecked: Boolean) {
+        try {
+            file.selected = isChecked
+            if (isChecked) {
+                selectedPrivateFiles.add(file)
+            } else {
+                for (sFile in selectedPrivateFiles) {
+                    if (sFile.name == file.name) {
+                        selectedPrivateFiles.remove(sFile)
+                        break
+                    }
+                }
+            }
 
+            selectNumber.value = selectedPrivateFiles.size
+
+            if (selectedPrivateFiles.size == 0) {
+                selectInfo.value = "退出"
+            } else {
+                selectInfo.value = "确定(" + selectedPrivateFiles.size + ")"
+            }
+        } catch (e:Exception) {
+            Log.e("MainViewModel", "checkPrivateFile Error:" + e.message)
+        }
     }
 
     fun checkFile(file: MyFile, isChecked: Boolean) {

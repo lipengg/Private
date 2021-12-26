@@ -79,7 +79,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
     }
 
     interface OnLongClickListener {
-        fun enterEditModel()
+        fun enterEditModel(file: PrivateFile)
     }
 
     interface OnCheckedChangeListener {
@@ -103,7 +103,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
                     listener.show(image)
                 }
                 imageView.setOnLongClickListener{
-                    longClickListener.enterEditModel()
+                    longClickListener.enterEditModel(image)
                     return@setOnLongClickListener true
                 }
 

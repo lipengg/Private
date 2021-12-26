@@ -29,6 +29,11 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         iv_add_image.setOnClickListener {
             mViewModel.loadFileList()
         }
+        btn_recover_encrypt_file.setOnClickListener{
+            if(mViewModel.selectNumber.value == 0) {
+                mViewModel.switchModel()
+            }
+        }
         initRecycleView()
     }
 
@@ -70,10 +75,11 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
                 mViewModel.checkPrivateFile(file, isChecked)
             }
         }, object: PrivateImageAdapter.OnLongClickListener {
-            override fun enterEditModel() {
+            override fun enterEditModel(file: PrivateFile) {
                 // 如果当前在查看模式长按进入编码模式, 已经是编辑模式长按无效
                 if(mViewModel.pageModel.value == 0) {
                     mViewModel.switchModel()
+                    //mViewModel.checkPrivateFile(file, true)
                 }
 
             }
