@@ -101,9 +101,6 @@ class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
                         }
                     }
                 }
-                if (checkListener == null) {
-                    checkbox.visibility = View.GONE
-                }
             } catch (e:Exception) {
                 Log.e("ImageAdapter","ImageViewHolder bind failed! Error: " + e.message)
             }

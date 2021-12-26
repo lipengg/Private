@@ -10,12 +10,14 @@ import androidx.annotation.NonNull
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.album.R
 import com.example.album.databinding.ItemPrivateImageBinding
 import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateImage
+import com.example.viewmodel.MainViewModel
 import java.io.File
 import java.lang.Exception
 
@@ -93,6 +95,7 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
 
         fun bind(@NonNull image: PrivateFile, listener: OnClickListener, checkListener: OnCheckedChangeListener, longClickListener: OnLongClickListener) {
             mBinding!!.image = image
+            mBinding!!.viewModel = MainViewModel.getInstance()
             try {
                 var imageView = itemView.findViewById<ImageView>(R.id.iv_private_thumbnail)
                 Glide.with(itemView.context.applicationContext).load(image.getFilePath()).into(imageView)
@@ -111,9 +114,6 @@ class PrivateImageAdapter : RecyclerView.Adapter<PrivateImageAdapter.PrivateImag
                         it.onCheckedChanged(image, isChecked)
                         image.selected = isChecked
                     }
-                }
-                if (checkListener == null) {
-                    checkbox.visibility = View.GONE
                 }
             } catch (e:Exception) {
                 Log.e("ImageAdapter","ImageViewHolder bind failed! Error: " + e.message)
