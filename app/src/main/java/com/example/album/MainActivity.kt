@@ -80,4 +80,12 @@ class MainActivity : AppCompatActivity() {
             false
         }
     }
+
+    override fun onBackPressed() {
+        if(MainViewModel.getInstance().pageModel.value == 1) {
+            MainViewModel.getInstance().switchModel()
+            return
+        }
+        super.onBackPressed()
+    }
 }
