@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() {
             MainViewModel.getInstance().switchModel()
             return
         }
+        MainViewModel.getInstance().resetSelectFile()
         super.onBackPressed()
     }
 }

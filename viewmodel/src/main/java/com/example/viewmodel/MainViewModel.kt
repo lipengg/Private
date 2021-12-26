@@ -156,6 +156,16 @@ class MainViewModel: BaseViewModel() {
         })
     }
 
+    fun resetSelectFile() {
+        selectedFiles.clear()
+        selectNumber.value = 0
+        selectInfo.value = "退出"
+    }
+
+    fun clearSelectPrivateFile() {
+
+    }
+
     fun encrypt() {
         if (selectedFiles.isEmpty()) {
             encryptResult.value = true
@@ -173,11 +183,11 @@ class MainViewModel: BaseViewModel() {
                     Log.i("MainViewModel", "move file failure!")
                 }
             }
-            it.clear()
             DatabaseManager.dbManager.getPrivateFileDao().insert(encryptList)
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             updateEncryptFile()
+            resetSelectFile()
         },{
             Log.e("MainViewModel","encrypt insert")
         })
