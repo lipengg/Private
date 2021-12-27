@@ -42,7 +42,7 @@ class MainViewModel: BaseViewModel() {
 
     private var totalFolderId = 0
 
-    private var selectedFiles = ArrayList<MyFile>()
+    var selectedFiles = ArrayList<MyFile>()
     var selectedPrivateFiles = ArrayList<PrivateFile>()
     var encryptFiles = ObservableArrayList<PrivateFile>()
 
@@ -71,6 +71,7 @@ class MainViewModel: BaseViewModel() {
         pageFlag.value = imageFlag
         selectNumber.value = 0
         selectInfo.value = "退出"
+        encryptResult.value = false
         updateEncryptFile(true)
         return this
     }
@@ -150,7 +151,6 @@ class MainViewModel: BaseViewModel() {
             for (privateFile in it) {
                 encryptFiles.add(privateFile)
             }
-            encryptResult.value = true
             if(isInit)
                 initialled.value = true
         },{
@@ -159,25 +159,52 @@ class MainViewModel: BaseViewModel() {
     }
 
     fun resetSelectFile() {
+        for (sFile in selectedPrivateFiles) {
+            sFile.selected = false
+        }
+        selectedPrivateFiles.clear()
         selectedFiles.clear()
         selectNumber.value = 0
         selectInfo.value = "退出"
     }
 
-    fun resetSelectPrivateFile() {
-        for (sFile in selectedPrivateFiles) {
-            sFile.selected = false
+//    fun resetSelectPrivateFile() {
+//        for (sFile in selectedPrivateFiles) {
+//            sFile.selected = false
+//        }
+//        selectedPrivateFiles.clear()
+//        selectNumber.value = 0
+//        selectInfo.value = "退出"
+//    }
+
+    fun decode() {
+        if (selectedPrivateFiles.isEmpty()) {
+            return
         }
-        selectedPrivateFiles.clear()
-        selectNumber.value = 0
-        selectInfo.value = "退出"
+        encryptResult.value = false
+        Flowable.just(selectedPrivateFiles).flatMap {
+            for (privateFile in it) {
+                var privateFilePath = FileUtils.getPrivateDirectory() + privateFile.name
+                if(!FileUtils.moveImage(privateFilePath , privateFile.originPath, mApplication!!)) {
+                    Log.i("MainViewModel", "move file failure!")
+                }
+            }
+            DatabaseManager.dbManager.getPrivateFileDao().remove(it)
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            updateEncryptFile()
+            resetSelectFile()
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
     }
 
     fun encrypt() {
         if (selectedFiles.isEmpty()) {
-            encryptResult.value = true
             return
         }
+        encryptResult.value = false
         Flowable.just(selectedFiles).flatMap {
             var encryptList = ArrayList<PrivateFile>()
             for (myFile in it) {
@@ -195,6 +222,7 @@ class MainViewModel: BaseViewModel() {
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             updateEncryptFile()
             resetSelectFile()
+            encryptResult.value = true
         },{
             Log.e("MainViewModel","encrypt insert")
         })
@@ -221,7 +249,7 @@ class MainViewModel: BaseViewModel() {
             if (selectedPrivateFiles.size == 0) {
                 selectInfo.value = "退出"
             } else {
-                selectInfo.value = "确定(" + selectedPrivateFiles.size + ")"
+                selectInfo.value = "恢复(" + selectedPrivateFiles.size + ")"
             }
         } catch (e:Exception) {
             Log.e("MainViewModel", "checkPrivateFile Error:" + e.message)
@@ -280,7 +308,7 @@ class MainViewModel: BaseViewModel() {
     }
 
     private fun getCurrentOrder(): String {
-        return orderMap.getOrElse(getPageFlag(), { MediaStore.Images.Media.DATE_MODIFIED })
+        return orderMap.getOrElse(getPageFlag(), { MediaStore.Images.Media.TITLE })
     }
 
     private fun getCurrentMediaData(): String {

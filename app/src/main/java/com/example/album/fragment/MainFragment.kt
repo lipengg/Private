@@ -1,6 +1,9 @@
 package com.example.album.fragment
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -30,7 +33,9 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
             mViewModel.loadFileList()
         }
         btn_recover_encrypt_file.setOnClickListener{
-            if(mViewModel.selectNumber.value == 0) {
+            if(mViewModel.selectNumber.value == 1) {
+                mViewModel.decode()
+            } else {
                 mViewModel.switchModel()
             }
         }
@@ -47,6 +52,20 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         })
         mViewModel.pageModel.observe(this, Observer {
             imageAdapter?.notifyDataSetChanged()
+        })
+        mViewModel.encryptResult.observe(this, Observer {
+            if(mViewModel.pageModel.value == 1) {
+                for(file in mViewModel.selectedPrivateFiles) {
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.originPath)))
+                }
+                mViewModel.switchModel()
+            } else {
+                for(file in mViewModel.selectedFiles) {
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.path)))
+                }
+            }
+//            activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
+            mViewModel.resetSelectFile()
         })
         mViewModel.encrypt()
     }
