@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.album.MainActivity
 import com.example.album.R
 import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
@@ -21,6 +22,7 @@ import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateFileType
 import com.example.model.bean.PrivateImage
 import com.example.viewmodel.MainViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 
 
@@ -54,6 +56,7 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         })
         mViewModel.pageModel.observe(this, Observer {
             imageAdapter?.notifyDataSetChanged()
+            (activity as MainActivity).setBottomNavigationVisibility(it == mViewModel.viewModel)
         })
         mViewModel.encryptResult.observe(this, Observer {
             if(mViewModel.pageModel.value == 1) {

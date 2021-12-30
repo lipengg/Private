@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -88,5 +89,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
         super.onBackPressed()
+    }
+
+    fun setBottomNavigationVisibility(value: Boolean) {
+        if(value)
+            bottom_nav_view.visibility = View.VISIBLE
+        else
+            bottom_nav_view.visibility = View.GONE
     }
 }

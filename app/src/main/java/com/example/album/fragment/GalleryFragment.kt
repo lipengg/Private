@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.album.MainActivity
 import com.example.album.R
 import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
@@ -21,6 +22,7 @@ import com.example.model.bean.Folder
 import com.example.model.bean.Image
 import com.example.model.bean.ImageFolder
 import com.example.viewmodel.MainViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 
 class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewModel>() {
@@ -41,6 +43,7 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
             findNavController().popBackStack()
         }
         initRecycleView()
+        (activity as MainActivity).setBottomNavigationVisibility(false)
     }
 
     private var imageAdapter: ImageAdapter? = null

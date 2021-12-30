@@ -27,8 +27,8 @@ class MainViewModel: BaseViewModel() {
     val imageFlag = PrivateFileType.IMAGE.value
     val videoFlag = PrivateFileType.VIDEO.value
 
-    private val viewModel = 0
-    private val editModel = 1
+    val viewModel = 0
+    val editModel = 1
 
     var pageFlag = MutableLiveData<Int>()
 
