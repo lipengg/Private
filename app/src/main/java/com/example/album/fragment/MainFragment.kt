@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentMainBinding
 import com.example.model.bean.PrivateFile
+import com.example.model.bean.PrivateFileType
 import com.example.model.bean.PrivateImage
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
@@ -86,8 +88,12 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_selected_image_list.layoutManager = layoutManager
         imageAdapter = PrivateImageAdapter(mViewModel.encryptFiles, object: PrivateImageAdapter.OnClickListener{
-            override fun show(image: PrivateFile) {
-                showImage(image)
+            override fun show(privateFile: PrivateFile) {
+                Log.i("show PrivateFile", "${privateFile.id}|${privateFile.name}|${privateFile.type}|${privateFile.originPath}|${privateFile.originName}")
+                if(privateFile.type == PrivateFileType.IMAGE.value)
+                    showImage(privateFile)
+                else if(privateFile.type == PrivateFileType.VIDEO.value)
+                    playVideo(privateFile)
             }
         }, object: PrivateImageAdapter.OnCheckedChangeListener {
             override fun onCheckedChanged(file: PrivateFile, isChecked: Boolean) {
@@ -110,6 +116,12 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         var bundle = Bundle()
         bundle.putString("path", image.getFilePath())
         findNavController().navigate(R.id.imageFragment, bundle)
+    }
+
+    fun playVideo(video: PrivateFile) {
+        var bundle = Bundle()
+        bundle.putString("path", video.getFilePath())
+        findNavController().navigate(R.id.videoFragment, bundle)
     }
 
     override fun onDestroyView() {
