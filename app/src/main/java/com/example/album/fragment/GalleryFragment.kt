@@ -17,10 +17,7 @@ import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentGalleryBinding
-import com.example.model.bean.File
-import com.example.model.bean.Folder
-import com.example.model.bean.Image
-import com.example.model.bean.ImageFolder
+import com.example.model.bean.*
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
@@ -52,8 +49,11 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_image_list.layoutManager = layoutManager
         imageAdapter = ImageAdapter(mViewModel.files, object: ImageAdapter.OnClickListener{
-            override fun show(image: File) {
-                showImage(image)
+            override fun show(file: File) {
+                if(mViewModel.pageFlag.value == mViewModel.imageFlag)
+                    showImage(file)
+                else if(mViewModel.pageFlag.value == mViewModel.videoFlag)
+                    playVideo(file)
             }
 
         }, object : ImageAdapter.OnCheckedChangeListener {
@@ -69,6 +69,12 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
         bundle.putString("path", image.path)
         var navController = findNavController()
         navController.navigate(R.id.action_galleryFragment_to_imageFragment4, bundle)
+    }
+
+    fun playVideo(video: File) {
+        var bundle = Bundle()
+        bundle.putString("path", video.path)
+        findNavController().navigate(R.id.videoFragment, bundle)
     }
 
 
