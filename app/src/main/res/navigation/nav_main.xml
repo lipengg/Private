@@ -22,6 +22,9 @@
         <action
             android:id="@+id/action_mainFragment_to_videoFragment"
             app:destination="@id/videoFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_videoActivity"
+            app:destination="@id/videoActivity" />
     </fragment>
     <fragment
         android:id="@+id/galleryFragment"
@@ -47,4 +50,9 @@
         android:name="com.example.album.fragment.VideoFragment"
         android:label="fragment_video"
         tools:layout="@layout/fragment_video" />
+    <activity
+        android:id="@+id/videoActivity"
+        android:name="com.example.album.activity.VideoActivity"
+        android:label="activity_video"
+        tools:layout="@layout/activity_video" />
 </navigation>

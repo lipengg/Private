@@ -3,26 +3,20 @@ package com.example.album.fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.album.MainActivity
+import com.example.album.activity.MainActivity
 import com.example.album.R
 import com.example.album.adapter.PrivateImageAdapter
 import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentMainBinding
 import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateFileType
-import com.example.model.bean.PrivateImage
 import com.example.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 
 
@@ -124,7 +118,7 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
     fun playVideo(video: PrivateFile) {
         var bundle = Bundle()
         bundle.putString("path", video.getFilePath())
-        findNavController().navigate(R.id.videoFragment, bundle)
+        findNavController().navigate(R.id.videoActivity, bundle)
     }
 
     override fun onDestroyView() {

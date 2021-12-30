@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.album.MainActivity
+import com.example.album.activity.MainActivity
 import com.example.album.R
 import com.example.album.adapter.AlbumAdapter
 import com.example.album.adapter.ImageAdapter
@@ -19,7 +19,6 @@ import com.example.album.base.BaseBindingFragment
 import com.example.album.databinding.FragmentGalleryBinding
 import com.example.model.bean.*
 import com.example.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 
 class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewModel>() {
@@ -74,7 +73,7 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
     fun playVideo(video: File) {
         var bundle = Bundle()
         bundle.putString("path", video.path)
-        findNavController().navigate(R.id.videoFragment, bundle)
+        findNavController().navigate(R.id.videoActivity, bundle)
     }
 
 

@@ -9,9 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.fragment.app.Fragment
-import com.example.album.MainActivity
+import com.example.album.activity.MainActivity
 import com.example.album.R
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_video.*
 
 

@@ -7,9 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
-import com.example.album.MainActivity
+import com.example.album.activity.MainActivity
 import com.example.album.R
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_image.*
 import java.io.File
 import java.lang.Exception

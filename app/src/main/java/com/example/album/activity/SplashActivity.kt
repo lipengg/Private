@@ -1,11 +1,10 @@
-package com.example.album
+package com.example.album.activity
 
 import android.Manifest
 import android.annotation.TargetApi
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.annotation.NonNull
@@ -13,6 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
+import com.example.album.R
 import com.example.album.base.BasicActivity
 import com.example.model.database.DatabaseManager
 import com.example.viewmodel.MainViewModel

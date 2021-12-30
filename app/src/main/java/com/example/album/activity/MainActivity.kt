@@ -1,5 +1,6 @@
-package com.example.album
+package com.example.album.activity
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -8,13 +9,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.example.album.fragment.MainFragment
+import com.example.album.R
+import com.example.model.bean.PrivateFile
 import com.example.viewmodel.MainViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -73,7 +73,9 @@ class MainActivity : AppCompatActivity() {
         leftNav.setNavigationItemSelectedListener { item->
             when (item.itemId) {
                 R.id.recycleFragment -> {
-                    findNavController(R.id.nav_main_fragment).navigate(R.id.recycleFragment)
+                    findNavController(R.id.nav_main_fragment).navigate(
+                        R.id.recycleFragment
+                    )
                     findViewById<DrawerLayout>(R.id.draw_layout).closeDrawer(Gravity.LEFT)
                     return@setNavigationItemSelectedListener true
                 }
