@@ -51,6 +51,22 @@ class FileUtils {
             file.delete()
         }
 
+        fun renameFile(src: String, dest: String): Boolean {
+            var result = false
+            if (src.isEmpty() or dest.isEmpty()) {
+                return result
+            }
+
+            val destFile = File(dest)
+            if (destFile != null && destFile.exists()) {
+                destFile.delete() // delete file
+            }
+
+            val srcFile = File(src)
+
+            return srcFile.renameTo(destFile)
+        }
+
         fun moveImage(src: String, dest: String, application: Application): Boolean {
             var result = false
             if (src.isEmpty() or dest.isEmpty()) {

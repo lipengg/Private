@@ -185,7 +185,7 @@ class MainViewModel: BaseViewModel() {
         Flowable.just(selectedPrivateFiles).flatMap {
             for (privateFile in it) {
                 var privateFilePath = FileUtils.getPrivateDirectory() + privateFile.name
-                if(!FileUtils.moveImage(privateFilePath , privateFile.originPath, mApplication!!)) {
+                if(!FileUtils.renameFile(privateFilePath , privateFile.originPath)) {
                     Log.i("MainViewModel", "move file failure!")
                 }
             }
@@ -211,7 +211,7 @@ class MainViewModel: BaseViewModel() {
                 var privateFilename = FileUtils.getImagePrivateFileName()
                 var privateFilePath = FileUtils.getPrivateDirectory() + privateFilename
                 var privateFile = PrivateFile(0, privateFilename, getCurrentFileType(), getCurrentFileStatus(), myFile.name, myFile.path, false)
-                if(FileUtils.moveImage(myFile.path , privateFilePath, mApplication!!)) {
+                if(FileUtils.renameFile(myFile.path , privateFilePath)) {
                     encryptList.add(privateFile)
                 } else {
                     Log.i("MainViewModel", "move file failure!")

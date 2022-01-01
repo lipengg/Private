@@ -18,6 +18,7 @@ import com.example.model.bean.PrivateFile
 import com.example.model.bean.PrivateFileType
 import com.example.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
+import java.io.File
 
 
 class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
@@ -55,12 +56,12 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         mViewModel.encryptResult.observe(this, Observer {
             if(mViewModel.pageModel.value == 1) {
                 for(file in mViewModel.selectedPrivateFiles) {
-                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.originPath)))
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(file.originPath))))
                 }
                 mViewModel.switchModel()
             } else {
                 for(file in mViewModel.selectedFiles) {
-                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.path)))
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File((file.path)))))
                 }
             }
 //            activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
