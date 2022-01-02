@@ -193,7 +193,7 @@ class MainViewModel: BaseViewModel() {
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             updateEncryptFile()
-            resetSelectFile()
+            //resetSelectFile()
             encryptResult.value = true
         },{
             Log.e("MainViewModel","encrypt insert")
@@ -221,7 +221,7 @@ class MainViewModel: BaseViewModel() {
             return@flatMap Flowable.just(1)
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             updateEncryptFile()
-            resetSelectFile()
+            //resetSelectFile()
             encryptResult.value = true
         },{
             Log.e("MainViewModel","encrypt insert")

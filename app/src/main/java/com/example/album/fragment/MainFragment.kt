@@ -32,7 +32,7 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
             mViewModel.loadFileList()
         }
         btn_recover_encrypt_file.setOnClickListener{
-            if(mViewModel.selectNumber.value == 1) {
+            if(mViewModel.selectNumber.value!! > 0) {
                 mViewModel.decode()
             } else {
                 mViewModel.switchModel()
@@ -65,7 +65,8 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
                 }
             }
 //            activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
-            mViewModel.resetSelectFile()
+            if(it)
+                mViewModel.resetSelectFile()
         })
         mViewModel.encrypt()
     }
