@@ -88,6 +88,26 @@ class MainViewModel: BaseViewModel() {
         }
     }
 
+    fun recycleSelectedFile() {
+        if (selectedPrivateFiles.isEmpty()) {
+            return
+        }
+        encryptResult.value = false
+        Flowable.just(selectedPrivateFiles).flatMap {
+            for (myFile in it) {
+                myFile.status = PrivateFileStatus.Invalid.value
+                DatabaseManager.dbManager.getPrivateFileDao().update(myFile)
+            }
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            updateEncryptFile()
+            resetSelectFile()
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+
     fun loadFileList() {
         if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
             //Toast.makeText(context, "当前存储卡不可用", Toast.LENGTH_SHORT).show()
@@ -142,6 +162,12 @@ class MainViewModel: BaseViewModel() {
         return DatabaseManager.dbManager.getPrivateFileDao().getFiles(type, status)
     }
 
+    private fun getRecycleFiles() :List<PrivateFile> {
+        val type = getPageFlag()
+        val status = PrivateFileStatus.Invalid.value
+        return DatabaseManager.dbManager.getPrivateFileDao().getFiles(type, status)
+    }
+
     private fun updateEncryptFile(isInit: Boolean = false) {
         Flowable.just(1).flatMap {
             var list = getCurrentPageFiles()
@@ -158,6 +184,20 @@ class MainViewModel: BaseViewModel() {
         })
     }
 
+    fun loadRecycleFile() {
+        Flowable.just(1).flatMap {
+            var list = getRecycleFiles()
+            return@flatMap Flowable.just(list)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            encryptFiles.clear()
+            for (privateFile in it) {
+                encryptFiles.add(privateFile)
+            }
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+
     fun resetSelectFile() {
         for (sFile in selectedPrivateFiles) {
             sFile.selected = false
@@ -167,15 +207,6 @@ class MainViewModel: BaseViewModel() {
         selectNumber.value = 0
         selectInfo.value = "退出"
     }
-
-//    fun resetSelectPrivateFile() {
-//        for (sFile in selectedPrivateFiles) {
-//            sFile.selected = false
-//        }
-//        selectedPrivateFiles.clear()
-//        selectNumber.value = 0
-//        selectInfo.value = "退出"
-//    }
 
     fun decode() {
         if (selectedPrivateFiles.isEmpty()) {
@@ -202,6 +233,7 @@ class MainViewModel: BaseViewModel() {
 
     fun encrypt() {
         if (selectedFiles.isEmpty()) {
+            updateEncryptFile()
             return
         }
         encryptResult.value = false
@@ -226,8 +258,6 @@ class MainViewModel: BaseViewModel() {
         },{
             Log.e("MainViewModel","encrypt insert")
         })
-
-
     }
 
     fun checkPrivateFile(file: PrivateFile, isChecked: Boolean) {

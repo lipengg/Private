@@ -21,12 +21,12 @@ enum class PrivateFileStatus(val value: Int){
 
 @Entity(tableName = "private_file")
 class PrivateFile(@ColumnInfo(name="id") @PrimaryKey(autoGenerate = true) val id : Int,
-                   @ColumnInfo(name="name") val name : String,
+                  @ColumnInfo(name="name") val name : String,
                   @ColumnInfo(name="type") val type : Int,
-                  @ColumnInfo(name="status") val status : Int,
-                   @ColumnInfo(name="origin_name") val originName : String,
-                   @ColumnInfo(name="origin_path") val originPath : String,
-                   var selected: Boolean
+                  @ColumnInfo(name="status") var status : Int,
+                  @ColumnInfo(name="origin_name") val originName : String,
+                  @ColumnInfo(name="origin_path") val originPath : String,
+                  var selected: Boolean
 ) {
     fun getFilePath(): String {
         return CommonUtil.getPrivateDirectory() + name

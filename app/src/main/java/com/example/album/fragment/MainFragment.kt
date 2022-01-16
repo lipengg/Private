@@ -31,6 +31,9 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
         iv_add_image.setOnClickListener {
             mViewModel.loadFileList()
         }
+        btn_del_encrypt_file.setOnClickListener{
+            mViewModel.recycleSelectedFile()
+        }
         btn_recover_encrypt_file.setOnClickListener{
             if(mViewModel.selectNumber.value!! > 0) {
                 mViewModel.decode()

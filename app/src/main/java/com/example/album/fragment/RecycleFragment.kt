@@ -1,60 +1,133 @@
 package com.example.album.fragment
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.album.activity.MainActivity
 import com.example.album.R
+import com.example.album.adapter.PrivateImageAdapter
+import com.example.album.base.BaseBindingFragment
+import com.example.album.databinding.FragmentMainBinding
+import com.example.album.databinding.FragmentRecycleBinding
+import com.example.model.bean.PrivateFile
+import com.example.model.bean.PrivateFileType
+import com.example.viewmodel.MainViewModel
+import kotlinx.android.synthetic.main.fragment_main.*
+import kotlinx.android.synthetic.main.fragment_recycle.*
+import java.io.File
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RecycleFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class RecycleFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+class RecycleFragment : BaseBindingFragment<FragmentRecycleBinding, MainViewModel>() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    override fun getViewModel() = MainViewModel.getInstance()
+
+    override fun getResourceLayout() = R.layout.fragment_recycle
+
+    private fun loadRecycleFile() {
+        mViewModel.resetSelectFile()
+        mViewModel.loadRecycleFile()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recycle, container, false)
+    override fun initView(root: View) {
+        loadRecycleFile()
+
+        btn_del_file.setOnClickListener{
+            if(mViewModel.pageModel.value == mViewModel.viewModel) {
+
+            } else {
+                if(mViewModel.selectNumber.value!! > 0) {
+                    mViewModel.decode()
+                } else {
+                    mViewModel.switchModel()
+                }
+            }
+
+        }
+        initRecycleView()
+        (activity as MainActivity).setBottomNavigationVisibility(false)
+    }
+
+    override fun initData(savedInstanceState: Bundle?) {
+        super.initData(savedInstanceState)
+        mViewModel.pageModel.observe(this, Observer {
+            imageAdapter?.notifyDataSetChanged()
+        })
+        mViewModel.encryptResult.observe(this, Observer {
+            if(mViewModel.pageModel.value == mViewModel.editModel) {
+                for(file in mViewModel.selectedPrivateFiles) {
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(file.originPath))))
+                }
+                mViewModel.switchModel()
+            } else {
+                for(file in mViewModel.selectedFiles) {
+                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File((file.path)))))
+                }
+            }
+//            activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
+            if(it)
+                mViewModel.resetSelectFile()
+        })
+    }
+
+    override fun setViewModel(binding: FragmentRecycleBinding, vm: MainViewModel) {
+        binding.viewModel = vm
+        binding.lifecycleOwner = this
+    }
+
+    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel = AlbumViewModel(requireActivity().application)
+    }*/
+
+    private var imageAdapter: PrivateImageAdapter? = null
+    private fun initRecycleView() {
+        val layoutManager = GridLayoutManager(context, SPAN_COUNT, GridLayoutManager.VERTICAL, false)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        rv_recycle_file_list.layoutManager = layoutManager
+        imageAdapter = PrivateImageAdapter(mViewModel.encryptFiles, object: PrivateImageAdapter.OnClickListener{
+            override fun show(privateFile: PrivateFile) {
+                Log.i("show PrivateFile", "${privateFile.id}|${privateFile.name}|${privateFile.type}|${privateFile.originPath}|${privateFile.originName}")
+                if(privateFile.type == PrivateFileType.IMAGE.value)
+                    showImage(privateFile)
+                else if(privateFile.type == PrivateFileType.VIDEO.value)
+                    playVideo(privateFile)
+            }
+        }, object: PrivateImageAdapter.OnCheckedChangeListener {
+            override fun onCheckedChanged(file: PrivateFile, isChecked: Boolean) {
+                mViewModel.checkPrivateFile(file, isChecked)
+            }
+        }, object: PrivateImageAdapter.OnLongClickListener {
+            override fun enterEditModel(file: PrivateFile) {
+                // 如果当前在查看模式长按进入编码模式, 已经是编辑模式长按无效
+                if(mViewModel.pageModel.value == 0) {
+                    mViewModel.switchModel()
+                    //mViewModel.checkPrivateFile(file, true)
+                }
+
+            }
+        })
+        rv_recycle_file_list.adapter = imageAdapter
+    }
+
+    fun showImage(image: PrivateFile) {
+        var bundle = Bundle()
+        bundle.putString("path", image.getFilePath())
+        findNavController().navigate(R.id.imageFragment, bundle)
+    }
+
+    fun playVideo(video: PrivateFile) {
+        var bundle = Bundle()
+        bundle.putString("path", video.getFilePath())
+        findNavController().navigate(R.id.videoActivity, bundle)
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment RecycleFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            RecycleFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        const val SPAN_COUNT = 4
     }
 }

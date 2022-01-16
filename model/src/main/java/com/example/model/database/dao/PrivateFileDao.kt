@@ -33,4 +33,7 @@ interface PrivateFileDao {
 
     @Query("delete from private_file")
     fun clear()
+
+    @Update
+    fun update(vararg  items: PrivateFile)
 }
