@@ -39,16 +39,20 @@ class RecycleFragment : BaseBindingFragment<FragmentRecycleBinding, MainViewMode
 
         btn_del_file.setOnClickListener{
             if(mViewModel.pageModel.value == mViewModel.viewModel) {
-
+                mViewModel.deleteAllFile()
             } else {
                 if(mViewModel.selectNumber.value!! > 0) {
-                    mViewModel.decode()
+                    mViewModel.deleteSelectedFile()
                 } else {
                     mViewModel.switchModel()
                 }
             }
 
         }
+        btn_recover_del_file.setOnClickListener{
+            mViewModel.recoverSelectedFile()
+        }
+
         initRecycleView()
         (activity as MainActivity).setBottomNavigationVisibility(false)
     }

@@ -88,6 +88,66 @@ class MainViewModel: BaseViewModel() {
         }
     }
 
+    fun deleteAllFile() {
+        if (encryptFiles.isEmpty()) {
+            return
+        }
+        encryptResult.value = false
+        Flowable.just(encryptFiles).flatMap {
+            for (myFile in it) {
+                FileUtils.deleteFile(myFile.originPath)
+                DatabaseManager.dbManager.getPrivateFileDao().remove(myFile)
+            }
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            loadRecycleFile()
+            resetSelectFile()
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+    // 回收站删除文件
+    fun deleteSelectedFile() {
+        if (selectedPrivateFiles.isEmpty()) {
+            return
+        }
+        encryptResult.value = false
+        Flowable.just(selectedPrivateFiles).flatMap {
+            for (myFile in it) {
+                FileUtils.deleteFile(myFile.originPath)
+                DatabaseManager.dbManager.getPrivateFileDao().remove(myFile)
+            }
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            loadRecycleFile()
+            resetSelectFile()
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+    // 回收站恢复文件
+    fun recoverSelectedFile() {
+        if (selectedPrivateFiles.isEmpty()) {
+            return
+        }
+        encryptResult.value = false
+        Flowable.just(selectedPrivateFiles).flatMap {
+            for (myFile in it) {
+                myFile.status = PrivateFileStatus.Valid.value
+                DatabaseManager.dbManager.getPrivateFileDao().update(myFile)
+            }
+            return@flatMap Flowable.just(1)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            loadRecycleFile()
+            resetSelectFile()
+            encryptResult.value = true
+        },{
+            Log.e("MainViewModel","encrypt insert")
+        })
+    }
+
     fun recycleSelectedFile() {
         if (selectedPrivateFiles.isEmpty()) {
             return
