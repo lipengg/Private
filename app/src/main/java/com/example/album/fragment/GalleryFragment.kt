@@ -38,6 +38,9 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
             //mViewModel.encrypt()
             findNavController().popBackStack()
         }
+        btn_select_all.setOnClickListener{
+            mViewModel.selectAllFile()
+        }
         initRecycleView()
         (activity as MainActivity).setBottomNavigationVisibility(false)
     }
@@ -80,6 +83,11 @@ class GalleryFragment : BaseBindingFragment<FragmentGalleryBinding, MainViewMode
     override fun initData(savedInstanceState: Bundle?) {
         mViewModel.currentFolder.observe(this, Observer {
             refreshAlbumList()
+        })
+        mViewModel.selectAllResult.observe(this, Observer {
+            if(it) {
+                imageAdapter?.notifyDataSetChanged()
+            }
         })
     }
 

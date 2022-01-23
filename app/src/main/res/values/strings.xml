@@ -4,6 +4,7 @@
     <string name="image">图片</string>
     <string name="video">视频</string>
     <string name="recover">恢复</string>
+    <string name="selectAll">全选</string>
     <string name="delete">删除</string>
     <string name="recycle">回收站</string>
     <string name="deleteAll">删除所有</string>

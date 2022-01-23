@@ -61,6 +61,8 @@ class MainViewModel: BaseViewModel() {
 
     var pageModel = MutableLiveData<Int>()
 
+    var selectAllResult = MutableLiveData<Boolean>()
+
 /*    constructor(mApplication: Application):super(mApplication) {
         //getImageList()
     }*/
@@ -72,6 +74,7 @@ class MainViewModel: BaseViewModel() {
         selectNumber.value = 0
         selectInfo.value = "退出"
         encryptResult.value = false
+        selectAllResult.value = false
         updateEncryptFile(true)
         return this
     }
@@ -344,6 +347,47 @@ class MainViewModel: BaseViewModel() {
         } catch (e:Exception) {
             Log.e("MainViewModel", "checkPrivateFile Error:" + e.message)
         }
+    }
+
+    fun selectAllFile() {
+        selectAllResult.value = false
+        if(selectedFiles.isNotEmpty()) {
+            for (sFile in selectedFiles) {
+                sFile.selected = false
+
+                if (currentFolder.value!!.id != totalFolderId) {
+                    for (myFile in allFiles) {
+                        if (myFile.path == sFile.path) {
+                            myFile.selected = false
+                        }
+                    }
+                }
+            }
+
+            selectedFiles.clear()
+        } else {
+            for (sFile in files) {
+                sFile.selected = true
+                selectedFiles.add(sFile)
+
+                if (currentFolder.value!!.id != totalFolderId) {
+                    for (myFile in allFiles) {
+                        if (myFile.path == sFile.path) {
+                            myFile.selected = true
+                        }
+                    }
+                }
+            }
+        }
+
+        selectNumber.value = selectedFiles.size
+
+        if (selectedFiles.size == 0) {
+            selectInfo.value = "退出"
+        } else {
+            selectInfo.value = "确定(" + selectedFiles.size + ")"
+        }
+        selectAllResult.value = true
     }
 
     fun checkFile(file: MyFile, isChecked: Boolean) {
