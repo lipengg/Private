@@ -1,6 +1,6 @@
 package com.example.album.activity
 
-import android.content.Intent
+import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,18 +12,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.album.R
-import com.example.model.bean.PrivateFile
+import com.example.album.dialog.LoadingDialog
 import com.example.viewmodel.MainViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.dialog_view.*
 
 class MainActivity : AppCompatActivity() {
 
     //var viewModel: MainViewModel? = null
     private val TAG = "MainActivity"
+
+    lateinit var dialog : LoadingDialog
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +85,21 @@ class MainActivity : AppCompatActivity() {
             }
             false
         }
+
+
+        dialog = LoadingDialog(this)
+    }
+
+    /**
+     * 启动自定义的对话框
+     * @param view
+     */
+    fun showLoadDialog() {
+        dialog.show()
+    }
+
+    fun hideLoadDialog() {
+        dialog.hide()
     }
 
     override fun onBackPressed() {

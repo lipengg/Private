@@ -57,19 +57,26 @@ class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
             (activity as MainActivity).setBottomNavigationVisibility(it == mViewModel.viewModel)
         })
         mViewModel.encryptResult.observe(this, Observer {
-            if(mViewModel.pageModel.value == 1) {
-                for(file in mViewModel.selectedPrivateFiles) {
-                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(file.originPath))))
-                }
-                mViewModel.switchModel()
-            } else {
-                for(file in mViewModel.selectedFiles) {
-                    activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File((file.path)))))
-                }
-            }
+
 //            activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
-            if(it)
+            if(it) {
+                if(mViewModel.pageModel.value == 1) {
+                    for(file in mViewModel.selectedPrivateFiles) {
+                        activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(file.originPath))))
+                    }
+                    mViewModel.switchModel()
+                } else {
+                    for(file in mViewModel.selectedFiles) {
+                        activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File((file.path)))))
+                    }
+                }
+
                 mViewModel.resetSelectFile()
+                (activity as MainActivity).hideLoadDialog()
+            } else {
+                (activity as MainActivity).showLoadDialog()
+            }
+
         })
         mViewModel.encrypt()
     }

@@ -73,7 +73,7 @@ class MainViewModel: BaseViewModel() {
         pageFlag.value = imageFlag
         selectNumber.value = 0
         selectInfo.value = "退出"
-        encryptResult.value = false
+        encryptResult.value = true
         selectAllResult.value = false
         updateEncryptFile(true)
         return this
